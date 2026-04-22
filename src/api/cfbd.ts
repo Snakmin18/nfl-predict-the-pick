@@ -16,6 +16,7 @@ type CfbdPlayerResponse = {
 
 export async function searchPlayers(searchTerm: string): Promise<Player[]> {
   if (!searchTerm.trim()) return [];
+  if (!BASE_URL || !API_KEY) return [];
 
   const url = new URL("/player/search", BASE_URL);
   url.searchParams.set("searchTerm", searchTerm);

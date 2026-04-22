@@ -1,37 +1,50 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { MockDraft } from "../types/draft";
 import { getAllDrafts, saveDraft } from "../utils/draftStorage";
 import { loadDraftOrder } from "../utils/draftOrderStorage";
+import { buildDraft } from "../utils/draft";
 
 function buildInitialDraft(title: string): MockDraft {
-  const draftOrder = loadDraftOrder();
-
-  return {
-    id: crypto.randomUUID(),
-    bigBoard: [],
-    title,
-    year: 2026,
-    createdAt: new Date().toISOString(),
-    picks: draftOrder.map((item) => ({
-      pickNumber: item.pickNumber,
-      teamId: item.teamId,
-      originalOwnerTeamId: item.originalOwnerTeamId,
-      predictedPlayer: null,
-    })),
-  };
+  return buildDraft(title, loadDraftOrder());
 }
 
 export default function NewDraftPage() {
   const [title, setTitle] = useState("");
+  const [drafts, setDrafts] = useState<MockDraft[]>([]);
+  const [isLoadingDrafts, setIsLoadingDrafts] = useState(true);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
-  const drafts = useMemo(() => getAllDrafts(), []);
 
-  const handleCreateDraft = () => {
+  useEffect(() => {
+    let isMounted = true;
+
+    getAllDrafts()
+      .then((loadedDrafts) => {
+        if (isMounted) setDrafts(loadedDrafts);
+      })
+      .catch(() => {
+        if (isMounted) setError("Unable to load drafts.");
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingDrafts(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleCreateDraft = async () => {
     const finalTitle = title.trim() || "My Mock Draft";
     const draft = buildInitialDraft(finalTitle);
-    saveDraft(draft);
-    navigate(`/draft/${draft.id}`);
+
+    try {
+      await saveDraft(draft);
+      navigate(`/draft/${draft.id}`);
+    } catch {
+      setError("Unable to create draft. Please try again.");
+    }
   };
 
   return (
@@ -47,6 +60,7 @@ export default function NewDraftPage() {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Jake's 2026 Mock Draft"
         />
+        {error && <p className="error">{error}</p>}
         <button onClick={handleCreateDraft}>Create Draft</button>
       </div>
 
@@ -56,7 +70,9 @@ export default function NewDraftPage() {
 
       <div className="card">
         <h2>Saved Drafts</h2>
-        {drafts.length === 0 ? (
+        {isLoadingDrafts ? (
+          <p>Loading drafts...</p>
+        ) : drafts.length === 0 ? (
           <p>No drafts yet.</p>
         ) : (
           <ul>

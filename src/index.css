@@ -40,7 +40,8 @@ button {
   margin-bottom: 16px;
 }
 
-.card input {
+.card input,
+.card select {
   width: 100%;
   margin: 8px 0 12px;
   padding: 10px 12px;
@@ -56,6 +57,38 @@ button {
   border-radius: 8px;
   background: #2563eb;
   color: white;
+}
+
+.accordion-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.accordion-card summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 16px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.accordion-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.accordion-card summary::after {
+  content: "+";
+  float: right;
+  color: #93c5fd;
+}
+
+.accordion-card[open] summary::after {
+  content: "-";
+}
+
+.accordion-card__content {
+  border-top: 1px solid #374151;
+  padding: 16px;
 }
 
 .pick-row {
@@ -74,6 +107,15 @@ button {
 
 .pick-row__current {
   margin-bottom: 12px;
+}
+
+.pick-row__score {
+  color: #d1d5db;
+  margin-bottom: 12px;
+}
+
+.pick-row__score strong {
+  color: #86efac;
 }
 
 .pick-row input {
@@ -129,6 +171,12 @@ select {
   flex-wrap: wrap;
 }
 
+.draft-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .big-board {
   background: #1f2937;
   padding: 16px;
@@ -164,6 +212,74 @@ select {
   min-width: 0;
 }
 
+.draft-board__rounds {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.draft-board__round {
+  border: 1px solid #374151;
+  border-radius: 8px;
+  background: #111827;
+  color: #d1d5db;
+  padding: 8px 12px;
+}
+
+.draft-board__round--active {
+  background: #2563eb;
+  border-color: #60a5fa;
+  color: white;
+}
+
+.score-summary {
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.score-summary span {
+  color: #d1d5db;
+}
+
+.scoreboard {
+  display: grid;
+  gap: 8px;
+}
+
+.scoreboard__header,
+.scoreboard__row {
+  display: grid;
+  grid-template-columns: 1fr 90px 130px;
+  gap: 12px;
+  align-items: center;
+}
+
+.scoreboard__header {
+  color: #d1d5db;
+  font-size: 14px;
+}
+
+.scoreboard__row {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  color: white;
+  padding: 10px 12px;
+  text-decoration: none;
+}
+
+.scoreboard__row:hover {
+  border-color: #60a5fa;
+}
+
 .pick-row {
   background: #1f2937;
   padding: 16px;
@@ -185,9 +301,34 @@ select {
   top: 16px;
 }
 
+.prospects-search {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.prospects-search span {
+  font-size: 14px;
+  color: #d1d5db;
+}
+
+.prospects-search input {
+  width: 100%;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  background: #111827;
+  color: white;
+  padding: 10px 12px;
+}
+
 .prospects-grid {
   display: grid;
   gap: 12px;
+}
+
+.prospects-empty {
+  margin: 0;
+  color: #d1d5db;
 }
 
 .prospect-card {
@@ -221,5 +362,110 @@ select {
 
   .prospects-panel {
     position: static;
+  }
+}
+
+.trade-panel {
+  margin: 1rem 0 1.5rem;
+  padding: 1rem;
+  border: 1px solid #d0d7de;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.trade-panel__header h2 {
+  margin: 0 0 0.25rem;
+}
+
+.trade-panel__header p {
+  margin: 0 0 1rem;
+  color: #57606a;
+}
+
+.trade-panel__team-selects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.trade-panel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.trade-panel__field select {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.trade-panel__columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.trade-panel__column {
+  padding: 0.9rem;
+  border: 1px solid #d8dee4;
+  border-radius: 10px;
+  background: #f6f8fa;
+}
+
+.trade-panel__column h3 {
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
+.trade-panel__subtle {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  color: #57606a;
+  font-size: 0.95rem;
+}
+
+.trade-panel__pick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.trade-panel__pick-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.trade-panel__empty {
+  margin: 0;
+  color: #57606a;
+}
+
+.trade-panel__footer {
+  margin-top: 1rem;
+}
+
+.trade-panel__footer button {
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.trade-panel__footer button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (max-width: 800px) {
+  .trade-panel__team-selects,
+  .trade-panel__columns {
+    grid-template-columns: 1fr;
   }
 }

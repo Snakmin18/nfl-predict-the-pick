@@ -18,5 +18,10 @@ export type MockDraft = {
   title: string;
   year: number;
   createdAt: string;
+  lobbyId?: string;
+  participantId?: string;
+  isOfficialResult?: boolean;
+  roundLimit?: number;
+  submittedAt?: string;
   picks: DraftPick[];
 };

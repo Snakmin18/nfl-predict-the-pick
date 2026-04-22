@@ -1,5 +1,25 @@
-import type { MockDraft } from "../types/draft";
+import type { DraftOrderItem, MockDraft } from "../types/draft";
 import type { Prospect } from "../types/prospect";
+
+const ROUND_END_PICK_NUMBERS = [32, 64, 100, 140, 181, 216, 257];
+
+export const MAX_DRAFT_ROUNDS = ROUND_END_PICK_NUMBERS.length;
+
+export function getRoundForPick(pickNumber: number) {
+  const roundIndex = ROUND_END_PICK_NUMBERS.findIndex(
+    (roundEndPickNumber) => pickNumber <= roundEndPickNumber,
+  );
+
+  return roundIndex === -1 ? MAX_DRAFT_ROUNDS : roundIndex + 1;
+}
+
+export function getDraftRoundLimit(draft: MockDraft) {
+  return draft.roundLimit ?? MAX_DRAFT_ROUNDS;
+}
+
+export function isPickInPredictionRange(draft: MockDraft, pickNumber: number) {
+  return getRoundForPick(pickNumber) <= getDraftRoundLimit(draft);
+}
 
 export function getDraftedProspectIds(draft: MockDraft): Set<string> {
   const ids = new Set<string>();
@@ -16,9 +36,40 @@ export function getDraftedProspectIds(draft: MockDraft): Set<string> {
 export function getTopAvailableProspects(
   allProspects: Prospect[],
   draft: MockDraft,
-  limit = 15,
+  limit?: number,
 ) {
   const draftedIds = getDraftedProspectIds(draft);
+  const availableProspects = allProspects.filter((p) => !draftedIds.has(p.id));
 
-  return allProspects.filter((p) => !draftedIds.has(p.id)).slice(0, limit);
+  return typeof limit === "number"
+    ? availableProspects.slice(0, limit)
+    : availableProspects;
+}
+
+export function buildDraft(
+  title: string,
+  draftOrder: DraftOrderItem[],
+  options?: {
+    lobbyId?: string;
+    participantId?: string;
+    isOfficialResult?: boolean;
+    roundLimit?: number;
+  },
+): MockDraft {
+  return {
+    id: crypto.randomUUID(),
+    title,
+    year: 2026,
+    createdAt: new Date().toISOString(),
+    lobbyId: options?.lobbyId,
+    participantId: options?.participantId,
+    isOfficialResult: options?.isOfficialResult,
+    roundLimit: options?.roundLimit,
+    picks: draftOrder.map((item) => ({
+      pickNumber: item.pickNumber,
+      teamId: item.teamId,
+      originalOwnerTeamId: item.originalOwnerTeamId,
+      predictedPlayer: null,
+    })),
+  };
 }
