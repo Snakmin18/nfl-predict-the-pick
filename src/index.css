@@ -1,0 +1,225 @@
+:root {
+  font-family: Inter, system-ui, Arial, sans-serif;
+  color: #f5f5f5;
+  background: #111827;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #111827;
+  color: #f5f5f5;
+}
+
+a {
+  color: #93c5fd;
+}
+
+button {
+  cursor: pointer;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.card {
+  background: #1f2937;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.card input {
+  width: 100%;
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #111827;
+  color: white;
+}
+
+.card button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+}
+
+.pick-row {
+  background: #1f2937;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.pick-row__top {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pick-row__current {
+  margin-bottom: 12px;
+}
+
+.pick-row input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #111827;
+  color: white;
+}
+
+.search-results {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.player-result {
+  text-align: left;
+  border: 1px solid #374151;
+  background: #0f172a;
+  color: white;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+select {
+  font: inherit;
+}
+
+.admin-field {
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.admin-field select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #111827;
+  color: white;
+}
+
+.admin-preview {
+  margin-top: 12px;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.big-board {
+  background: #1f2937;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.big-board__item {
+  border-bottom: 1px solid #374151;
+  padding: 10px 0;
+}
+
+.big-board__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.taken-label {
+  color: #f87171;
+  font-size: 12px;
+}
+
+.draft-layout {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.draft-layout__left,
+.draft-layout__right {
+  min-width: 0;
+}
+
+.pick-row {
+  background: #1f2937;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid transparent;
+}
+
+.pick-row--selected {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 1px #60a5fa;
+}
+
+.prospects-panel {
+  background: #1f2937;
+  padding: 16px;
+  border-radius: 12px;
+  position: sticky;
+  top: 16px;
+}
+
+.prospects-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.prospect-card {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.prospect-card__rank {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.prospect-card__name {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.prospect-card__meta {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 900px) {
+  .draft-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .prospects-panel {
+    position: static;
+  }
+}
