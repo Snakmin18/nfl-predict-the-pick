@@ -508,6 +508,38 @@ select {
   margin-bottom: 14px;
 }
 
+.prospects-filter-row {
+  align-items: end;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.prospects-filter {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 6px;
+}
+
+.prospects-filter span {
+  color: #d1d5db;
+  font-size: 14px;
+}
+
+.prospects-filter select {
+  width: 100%;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  background: #111827;
+  color: white;
+  padding: 10px 12px;
+}
+
+.prospects-filter__clear {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .prospects-search span {
   font-size: 14px;
   color: #d1d5db;
@@ -574,6 +606,15 @@ select {
 
   .pick-row__mobile-picker .prospects-grid {
     gap: 8px;
+  }
+
+  .pick-row__mobile-picker .prospects-filter-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pick-row__mobile-picker .prospects-filter__clear {
+    width: 100%;
   }
 
   .pick-row__mobile-picker .prospect-card {
