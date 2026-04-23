@@ -14,6 +14,10 @@ type Props = {
   onDraftProspect: (prospect: Prospect) => void;
 };
 
+function normalizePosition(position?: string) {
+  return position?.trim().toUpperCase() ?? "";
+}
+
 export default function ProspectPicker({
   prospects,
   selectedPickNumber,
@@ -24,18 +28,50 @@ export default function ProspectPicker({
   onDraftProspect,
 }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedPosition, setSelectedPosition] = useState("");
   const [cfbdProspects, setCfbdProspects] = useState<Prospect[]>([]);
   const [cfbdStatus, setCfbdStatus] = useState<"idle" | "loading" | "error">(
     "idle",
   );
   const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+  const normalizedSelectedPosition = normalizePosition(selectedPosition);
+
+  const positionOptions = useMemo(() => {
+    return Array.from(
+      new Set(
+        prospects
+          .map((prospect) => normalizePosition(prospect.position))
+          .filter(Boolean),
+      ),
+    ).sort((a, b) => a.localeCompare(b));
+  }, [prospects]);
+
+  useEffect(() => {
+    if (
+      normalizedSelectedPosition &&
+      !positionOptions.includes(normalizedSelectedPosition)
+    ) {
+      setSelectedPosition("");
+    }
+  }, [normalizedSelectedPosition, positionOptions]);
+
+  const filteredProspects = useMemo(() => {
+    if (!normalizedSelectedPosition) {
+      return prospects;
+    }
+
+    return prospects.filter(
+      (prospect) =>
+        normalizePosition(prospect.position) === normalizedSelectedPosition,
+    );
+  }, [normalizedSelectedPosition, prospects]);
 
   const localSearchProspects = useMemo(() => {
     if (!normalizedSearchTerm) {
-      return prospects.slice(0, resultLimit);
+      return filteredProspects.slice(0, resultLimit);
     }
 
-    return prospects
+    return filteredProspects
       .filter((prospect) => {
         const searchableText = [
           prospect.name,
@@ -48,7 +84,7 @@ export default function ProspectPicker({
         return searchableText.includes(normalizedSearchTerm);
       })
       .slice(0, Math.max(resultLimit, 20));
-  }, [normalizedSearchTerm, prospects, resultLimit]);
+  }, [filteredProspects, normalizedSearchTerm, resultLimit]);
 
   const shouldSearchCfbd =
     normalizedSearchTerm.length >= 2 && localSearchProspects.length === 0;
@@ -68,19 +104,29 @@ export default function ProspectPicker({
           if (isCanceled) return;
 
           setCfbdProspects(
-            players.slice(0, Math.max(resultLimit, 20)).map((player, index) => {
-              const school = player.school ?? "Unknown school";
+            players
+              .filter((player) => {
+                if (!normalizedSelectedPosition) return true;
 
-              return {
-                id: `cfbd:${player.id}`,
-                name: player.name,
-                school,
-                position: player.position,
-                year: player.year,
-                ranking: 10000 + index,
-                matchKey: buildProspectMatchKey(player.name, school),
-              };
-            }),
+                return (
+                  normalizePosition(player.position) ===
+                  normalizedSelectedPosition
+                );
+              })
+              .slice(0, Math.max(resultLimit, 20))
+              .map((player, index) => {
+                const school = player.school ?? "Unknown school";
+
+                return {
+                  id: `cfbd:${player.id}`,
+                  name: player.name,
+                  school,
+                  position: player.position,
+                  year: player.year,
+                  ranking: 10000 + index,
+                  matchKey: buildProspectMatchKey(player.name, school),
+                };
+              }),
           );
           setCfbdStatus("idle");
         })
@@ -96,7 +142,12 @@ export default function ProspectPicker({
       isCanceled = true;
       window.clearTimeout(timeoutId);
     };
-  }, [searchTerm, shouldSearchCfbd, resultLimit]);
+  }, [
+    normalizedSelectedPosition,
+    resultLimit,
+    searchTerm,
+    shouldSearchCfbd,
+  ]);
 
   const visibleProspects = shouldSearchCfbd
     ? cfbdProspects
@@ -105,6 +156,24 @@ export default function ProspectPicker({
 
   return (
     <div className={compact ? styles.compact : undefined}>
+      <div className={styles.filterRow}>
+        <label className={styles.filter} htmlFor={`${inputId}-position`}>
+          <span>Position</span>
+          <select
+            id={`${inputId}-position`}
+            value={selectedPosition}
+            onChange={(event) => setSelectedPosition(event.target.value)}
+          >
+            <option value="">All positions</option>
+            {positionOptions.map((position) => (
+              <option key={position} value={position}>
+                {position}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
       <label className={styles.search} htmlFor={inputId}>
         <span>Search prospects</span>
         <input
@@ -121,7 +190,10 @@ export default function ProspectPicker({
         ) : visibleCfbdStatus === "error" ? (
           <p className={styles.empty}>College football search is unavailable.</p>
         ) : visibleProspects.length === 0 ? (
-          <p className={styles.empty}>No available prospects found.</p>
+          <p className={styles.empty}>
+            No available prospects found
+            {selectedPosition ? ` for ${selectedPosition}` : ""}.
+          </p>
         ) : (
           visibleProspects.map((prospect) => (
             <div key={prospect.id} className={styles.card}>
