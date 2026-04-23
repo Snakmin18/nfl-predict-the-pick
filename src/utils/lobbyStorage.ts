@@ -1,5 +1,5 @@
 import type { Lobby } from "../types/lobby";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../lib/supabase/client";
 
 const LOBBY_PREFIX = "lobby:";
 

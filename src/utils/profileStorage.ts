@@ -1,5 +1,5 @@
 import type { Profile } from "../types/profile";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../lib/supabase/client";
 
 const PROFILE_PREFIX = "profile:";
 

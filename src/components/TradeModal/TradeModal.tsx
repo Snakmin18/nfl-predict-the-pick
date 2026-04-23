@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { nflTeams as teams } from "../data/nflTeams";
-import type { MockDraft } from "../types/draft";
-import { formatTeamLabel } from "../utils/teams";
-import type { PendingTrade } from "../utils/trades";
-import { getCurrentOwnerPickNumbers } from "../utils/trades";
+import { nflTeams as teams } from "../../data/nflTeams";
+import type { MockDraft } from "../../types/draft";
+import { formatTeamLabel } from "../../utils/teams";
+import type { PendingTrade } from "../../utils/trades";
+import { getCurrentOwnerPickNumbers } from "../../utils/trades";
+import styles from "./TradeModal.module.css";
 
 type Props = {
   isOpen: boolean;
@@ -133,93 +134,38 @@ export default function TradeModal({
     return <div>Modal root not found</div>;
   }
 
-  const portal = createPortal(
+  return createPortal(
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(9, 16, 29, 0.72)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "1rem",
-        zIndex: 9999,
-      }}
+      className={styles.backdrop}
       onClick={onClose}
       role="presentation"
     >
       <div
-        style={{
-          width: "min(960px, 100%)",
-          maxHeight: "90vh",
-          overflowY: "auto",
-          background: "#0f172a",
-          color: "#e5e7eb",
-          border: "1px solid #334155",
-          borderRadius: "16px",
-          boxShadow: "0 24px 80px rgba(0, 0, 0, 0.45)",
-          padding: "1.25rem",
-        }}
+        className={styles.modal}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="trade-modal-title"
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: "1rem",
-            marginBottom: "1rem",
-          }}
-        >
+        <div className={styles.header}>
           <div>
-            <h2
-              id="trade-modal-title"
-              style={{ margin: "0 0 0.2rem", color: "#f8fafc" }}
-            >
-              Trade Picks
-            </h2>
-            <p style={{ margin: 0, color: "#94a3b8" }}>
-              Move ownership of existing picks between teams.
-            </p>
+            <h2 id="trade-modal-title">Trade Picks</h2>
+            <p>Move ownership of existing picks between teams.</p>
           </div>
 
           <button
             type="button"
-            style={{
-              background: "transparent",
-              color: "#cbd5e1",
-              border: "1px solid #334155",
-              borderRadius: "10px",
-              width: "40px",
-              height: "40px",
-              fontSize: "1.5rem",
-              lineHeight: "1",
-              cursor: "pointer",
-            }}
+            className={styles.closeButton}
             onClick={onClose}
             aria-label="Close trade modal"
           >
-            ×
+            x
           </button>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(240px, 1fr))",
-            gap: "1rem",
-            marginBottom: "1rem",
-          }}
-        >
-          <label
-            style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}
-          >
-            <span style={{ fontSize: "0.92rem", color: "#cbd5e1" }}>
-              Team A
-            </span>
+        <div className={styles.teamSelects}>
+          <label className={styles.field}>
+            <span>Team A</span>
             <select
               value={teamAId}
               onChange={(e) => {
@@ -234,13 +180,6 @@ export default function TradeModal({
 
                 setTeamAPickNumbers([]);
               }}
-              style={{
-                background: "#111827",
-                color: "#f8fafc",
-                border: "1px solid #475569",
-                borderRadius: "10px",
-                padding: "0.7rem 0.8rem",
-              }}
             >
               {teams.map((team) => (
                 <option key={team.id} value={team.id}>
@@ -250,24 +189,13 @@ export default function TradeModal({
             </select>
           </label>
 
-          <label
-            style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}
-          >
-            <span style={{ fontSize: "0.92rem", color: "#cbd5e1" }}>
-              Team B
-            </span>
+          <label className={styles.field}>
+            <span>Team B</span>
             <select
               value={teamBId}
               onChange={(e) => {
                 setTeamBId(e.target.value);
                 setTeamBPickNumbers([]);
-              }}
-              style={{
-                background: "#111827",
-                color: "#f8fafc",
-                border: "1px solid #475569",
-                borderRadius: "10px",
-                padding: "0.7rem 0.8rem",
               }}
             >
               {teams
@@ -281,60 +209,19 @@ export default function TradeModal({
           </label>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: "1rem",
-            marginTop: "1rem",
-            marginBottom: "1rem",
-          }}
-        >
-          <div
-            style={{
-              background: "#111827",
-              border: "1px solid #334155",
-              borderRadius: "12px",
-              padding: "1rem",
-            }}
-          >
-            <h3 style={{ margin: "0 0 0.25rem", color: "#f8fafc" }}>
-              {formatTeamLabel(teamAId)}
-            </h3>
-            <p
-              style={{
-                margin: "0 0 0.75rem",
-                color: "#94a3b8",
-                fontSize: "0.9rem",
-              }}
-            >
-              Picks going to Team B
-            </p>
+        <div className={styles.columns}>
+          <div className={styles.column}>
+            <h3>{formatTeamLabel(teamAId)}</h3>
+            <p className={styles.subtle}>Picks going to Team B</p>
 
             {teamAPicks.length === 0 ? (
-              <p style={{ margin: 0, color: "#94a3b8" }}>
-                No picks currently owned.
-              </p>
+              <p className={styles.empty}>No picks currently owned.</p>
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.6rem",
-                  maxHeight: "280px",
-                  overflowY: "auto",
-                }}
-              >
+              <div className={styles.pickList}>
                 {teamAPicks.map((pickNumber) => (
                   <label
                     key={`${teamAId}-${pickNumber}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.6rem",
-                      color: "#e5e7eb",
-                      cursor: "pointer",
-                    }}
+                    className={styles.pickOption}
                   >
                     <input
                       type="checkbox"
@@ -344,7 +231,6 @@ export default function TradeModal({
                           togglePick(current, pickNumber),
                         )
                       }
-                      style={{ accentColor: "#60a5fa", cursor: "pointer" }}
                     />
                     <span>Pick #{pickNumber}</span>
                   </label>
@@ -353,51 +239,18 @@ export default function TradeModal({
             )}
           </div>
 
-          <div
-            style={{
-              background: "#111827",
-              border: "1px solid #334155",
-              borderRadius: "12px",
-              padding: "1rem",
-            }}
-          >
-            <h3 style={{ margin: "0 0 0.25rem", color: "#f8fafc" }}>
-              {formatTeamLabel(teamBId)}
-            </h3>
-            <p
-              style={{
-                margin: "0 0 0.75rem",
-                color: "#94a3b8",
-                fontSize: "0.9rem",
-              }}
-            >
-              Picks going to Team A
-            </p>
+          <div className={styles.column}>
+            <h3>{formatTeamLabel(teamBId)}</h3>
+            <p className={styles.subtle}>Picks going to Team A</p>
 
             {teamBPicks.length === 0 ? (
-              <p style={{ margin: 0, color: "#94a3b8" }}>
-                No picks currently owned.
-              </p>
+              <p className={styles.empty}>No picks currently owned.</p>
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.6rem",
-                  maxHeight: "280px",
-                  overflowY: "auto",
-                }}
-              >
+              <div className={styles.pickList}>
                 {teamBPicks.map((pickNumber) => (
                   <label
                     key={`${teamBId}-${pickNumber}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.6rem",
-                      color: "#e5e7eb",
-                      cursor: "pointer",
-                    }}
+                    className={styles.pickOption}
                   >
                     <input
                       type="checkbox"
@@ -407,7 +260,6 @@ export default function TradeModal({
                           togglePick(current, pickNumber),
                         )
                       }
-                      style={{ accentColor: "#60a5fa", cursor: "pointer" }}
                     />
                     <span>Pick #{pickNumber}</span>
                   </label>
@@ -417,41 +269,15 @@ export default function TradeModal({
           </div>
         </div>
 
-        <div
-          style={{
-            marginTop: "1rem",
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.9rem",
-          }}
-        >
-          <div
-            style={{
-              minHeight: "1.25rem",
-              color: "#cbd5e1",
-              fontSize: "0.95rem",
-            }}
-          >
+        <div className={styles.footer}>
+          <div className={styles.summary}>
             {tradeSummary || "Select at least one pick to trade."}
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "0.75rem",
-              justifyContent: "flex-end",
-            }}
-          >
+          <div className={styles.footerActions}>
             <button
               type="button"
-              style={{
-                borderRadius: "10px",
-                padding: "0.7rem 1rem",
-                background: "transparent",
-                color: "#e5e7eb",
-                border: "1px solid #475569",
-                cursor: "pointer",
-              }}
+              className={styles.cancelButton}
               onClick={onClose}
             >
               Cancel
@@ -459,15 +285,7 @@ export default function TradeModal({
 
             <button
               type="button"
-              style={{
-                borderRadius: "10px",
-                padding: "0.7rem 1rem",
-                background: canApplyTrade ? "#2563eb" : "#666",
-                color: "white",
-                border: "1px solid #2563eb",
-                cursor: canApplyTrade ? "pointer" : "not-allowed",
-                opacity: canApplyTrade ? 1 : 0.5,
-              }}
+              className={styles.applyButton}
               onClick={handleApply}
               disabled={!canApplyTrade}
             >
@@ -479,6 +297,4 @@ export default function TradeModal({
     </div>,
     modalRoot,
   );
-
-  return portal;
 }

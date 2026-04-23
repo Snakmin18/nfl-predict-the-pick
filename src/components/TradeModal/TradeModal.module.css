@@ -1,0 +1,179 @@
+.backdrop {
+  align-items: center;
+  background: rgba(9, 16, 29, 0.72);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1rem;
+  position: fixed;
+  z-index: 9999;
+}
+
+.modal {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  color: #e5e7eb;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.25rem;
+  width: min(960px, 100%);
+}
+
+.header {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.header h2 {
+  color: #f8fafc;
+  margin: 0 0 0.2rem;
+}
+
+.header p {
+  color: #94a3b8;
+  margin: 0;
+}
+
+.closeButton {
+  background: transparent;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: #cbd5e1;
+  cursor: pointer;
+  font-size: 1.5rem;
+  height: 40px;
+  line-height: 1;
+  width: 40px;
+}
+
+.teamSelects {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  margin-bottom: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field span {
+  color: #cbd5e1;
+  font-size: 0.92rem;
+}
+
+.field select {
+  background: #111827;
+  border: 1px solid #475569;
+  border-radius: 10px;
+  color: #f8fafc;
+  padding: 0.7rem 0.8rem;
+}
+
+.columns {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+}
+
+.column {
+  background: #111827;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.column h3 {
+  color: #f8fafc;
+  margin: 0 0 0.25rem;
+}
+
+.subtle {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  margin: 0 0 0.75rem;
+}
+
+.empty {
+  color: #94a3b8;
+  margin: 0;
+}
+
+.pickList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.pickOption {
+  align-items: center;
+  color: #e5e7eb;
+  cursor: pointer;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.pickOption input {
+  accent-color: #60a5fa;
+  cursor: pointer;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.summary {
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  min-height: 1.25rem;
+}
+
+.footerActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.cancelButton {
+  background: transparent;
+  border: 1px solid #475569;
+  border-radius: 10px;
+  color: #e5e7eb;
+  cursor: pointer;
+  padding: 0.7rem 1rem;
+}
+
+.applyButton {
+  background: #2563eb;
+  border: 1px solid #2563eb;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  padding: 0.7rem 1rem;
+}
+
+.applyButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 800px) {
+  .teamSelects,
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}

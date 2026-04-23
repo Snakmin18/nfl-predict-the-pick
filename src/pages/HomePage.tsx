@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AuthPanel from "../components/AuthPanel";
+import AuthPanel from "../components/AuthPanel/AuthPanel";
 import {
   generateAdminPin,
   generateLobbyCode,

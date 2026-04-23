@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { searchPlayers } from "../api/cfbd";
-import type { Prospect } from "../types/prospect";
-import { buildProspectMatchKey } from "../utils/prospects";
+import { searchPlayers } from "../../api/cfbd";
+import type { Prospect } from "../../types/prospect";
+import { buildProspectMatchKey } from "../../utils/prospects";
+import styles from "./ProspectPicker.module.css";
 
 type Props = {
   prospects: Prospect[];
   selectedPickNumber: number | null;
   isLocked?: boolean;
   resultLimit?: number;
+  compact?: boolean;
   inputId: string;
   onDraftProspect: (prospect: Prospect) => void;
 };
@@ -17,6 +19,7 @@ export default function ProspectPicker({
   selectedPickNumber,
   isLocked = false,
   resultLimit = 15,
+  compact = false,
   inputId,
   onDraftProspect,
 }: Props) {
@@ -101,8 +104,8 @@ export default function ProspectPicker({
   const visibleCfbdStatus = shouldSearchCfbd ? cfbdStatus : "idle";
 
   return (
-    <>
-      <label className="prospects-search" htmlFor={inputId}>
+    <div className={compact ? styles.compact : undefined}>
+      <label className={styles.search} htmlFor={inputId}>
         <span>Search prospects</span>
         <input
           id={inputId}
@@ -112,21 +115,19 @@ export default function ProspectPicker({
         />
       </label>
 
-      <div className="prospects-grid">
+      <div className={styles.grid}>
         {visibleCfbdStatus === "loading" ? (
-          <p className="prospects-empty">Searching college football data...</p>
+          <p className={styles.empty}>Searching college football data...</p>
         ) : visibleCfbdStatus === "error" ? (
-          <p className="prospects-empty">
-            College football search is unavailable.
-          </p>
+          <p className={styles.empty}>College football search is unavailable.</p>
         ) : visibleProspects.length === 0 ? (
-          <p className="prospects-empty">No available prospects found.</p>
+          <p className={styles.empty}>No available prospects found.</p>
         ) : (
           visibleProspects.map((prospect) => (
-            <div key={prospect.id} className="prospect-card">
-              <div className="prospect-card__rank">#{prospect.ranking}</div>
-              <div className="prospect-card__name">{prospect.name}</div>
-              <div className="prospect-card__meta">
+            <div key={prospect.id} className={styles.card}>
+              <div className={styles.rank}>#{prospect.ranking}</div>
+              <div className={styles.name}>{prospect.name}</div>
+              <div className={styles.meta}>
                 {prospect.position ?? "N/A"} | {prospect.school}
               </div>
 
@@ -141,6 +142,6 @@ export default function ProspectPicker({
           ))
         )}
       </div>
-    </>
+    </div>
   );
 }

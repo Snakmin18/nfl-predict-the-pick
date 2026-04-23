@@ -1,8 +1,9 @@
-import type { MockDraft } from "../types/draft";
-import type { Prospect } from "../types/prospect";
-import { getDraftRoundLimit, getRoundForPick } from "../utils/draft";
-import type { DraftScore } from "../utils/scoring";
-import PickRow from "./PickRow";
+import type { MockDraft } from "../../types/draft";
+import type { Prospect } from "../../types/prospect";
+import { getDraftRoundLimit, getRoundForPick } from "../../utils/draft";
+import type { DraftScore } from "../../utils/scoring";
+import PickRow from "../PickRow/PickRow";
+import styles from "./DraftBoard.module.css";
 
 type Props = {
   draft: MockDraft;
@@ -39,18 +40,16 @@ export default function DraftBoard({
   );
 
   return (
-    <div className="draft-board">
-      <div className="draft-board__rounds" aria-label="Draft rounds">
+    <div className={styles.board}>
+      <div className={styles.rounds} aria-label="Draft rounds">
         {Array.from({ length: roundLimit }, (_, index) => index + 1).map(
           (round) => (
             <button
               key={round}
               type="button"
-              className={
-                round === selectedRound
-                  ? "draft-board__round draft-board__round--active"
-                  : "draft-board__round"
-              }
+              className={`${styles.round} ${
+                round === selectedRound ? styles.roundActive : ""
+              }`.trim()}
               onClick={() => {
                 const firstPickInRound = draft.picks.find(
                   (pick) => getRoundForPick(pick.pickNumber) === round,
