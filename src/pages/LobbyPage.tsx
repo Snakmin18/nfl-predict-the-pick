@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import CountdownTimer from "../components/CountdownTimer";
-import { loadLobby, loadStoredAdminPin } from "../utils/lobbyStorage";
+import { loadLobby } from "../utils/lobbyStorage";
 import {
   getParticipantsByLobby,
   loadParticipant,
@@ -23,7 +23,6 @@ import type { MockDraft } from "../types/draft";
 export default function LobbyPage() {
   const { lobbyId = "", participantId = "" } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const [lobby, setLobby] = useState<Lobby | null>(null);
   const [participant, setParticipant] = useState<Participant | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -195,10 +194,6 @@ export default function LobbyPage() {
     (draft) => draft.submittedAt,
   ).length;
   const participantDraftCount = drafts.length;
-  const navigationState = location.state as { adminPin?: string } | null;
-  const knownAdminPin =
-    navigationState?.adminPin ?? loadStoredAdminPin(lobby.id);
-
   const handleCreateDraft = async () => {
     const draftOrder = loadDraftOrder();
     const title = `${participant.name}'s Draft`;
@@ -241,11 +236,9 @@ export default function LobbyPage() {
               As host, you can review room drafts and keep track of who has
               submitted.
             </p>
-            {knownAdminPin && (
-              <p>
-                Host PIN: <strong>{knownAdminPin}</strong>
-              </p>
-            )}
+            <p>
+              Room code: <strong>{lobby.code}</strong>
+            </p>
           </>
         )}
 
