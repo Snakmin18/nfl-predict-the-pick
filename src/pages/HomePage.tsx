@@ -369,10 +369,6 @@ export default function HomePage() {
             )}
           </div>
 
-          <div className="card">
-            <Link to="/new">Create a standalone draft</Link>
-          </div>
-
           </>
         )}
       </div>
