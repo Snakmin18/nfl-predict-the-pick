@@ -300,6 +300,14 @@ export default function DraftPage() {
       return;
     }
 
+    const shouldSubmit = window.confirm(
+      "Submit this draft? Your picks will be locked and you will not be able to edit them afterward.",
+    );
+
+    if (!shouldSubmit) {
+      return;
+    }
+
     const submittedDraft = {
       ...draft,
       submittedAt: new Date().toISOString(),
@@ -337,6 +345,15 @@ export default function DraftPage() {
     !isSubmissionDeadlinePassed &&
     predictionPicks.length > 0 &&
     completedPredictionPicks === predictionPicks.length;
+  const submitDraftMessage = !isParticipantLobbyDraft
+    ? ""
+    : isDraftSubmitted
+      ? "This draft has already been submitted."
+      : isSubmissionDeadlinePassed
+        ? "Submissions are closed for this draft."
+        : completedPredictionPicks < predictionPicks.length
+          ? `Finish all picks before submitting. ${completedPredictionPicks}/${predictionPicks.length} completed.`
+          : "Submitting will lock your draft and prevent further edits.";
   const backTo =
     draft?.lobbyId &&
     (navigationState?.viewerParticipantId ||
@@ -422,6 +439,7 @@ export default function DraftPage() {
               </button>
             </div>
           )}
+          {!isDraftSubmitted && submitDraftMessage && <p>{submitDraftMessage}</p>}
           {saveStatus && <p>{saveStatus}</p>}
         </div>
       )}
