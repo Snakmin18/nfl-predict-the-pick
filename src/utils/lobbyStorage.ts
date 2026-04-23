@@ -8,14 +8,16 @@ type LobbyRow = {
   code: string;
   name: string;
   host_participant_id: string;
+  host_user_id: string | null;
   admin_pin?: string | null;
+  year: number | null;
   round_limit: number | null;
   status: Lobby["status"];
   created_at: string;
 };
 
 const LOBBY_SELECT_COLUMNS =
-  "id, code, name, host_participant_id, round_limit, status, created_at";
+  "id, code, name, host_participant_id, host_user_id, year, round_limit, status, created_at";
 
 function toLobby(row: LobbyRow): Lobby {
   return {
@@ -23,7 +25,9 @@ function toLobby(row: LobbyRow): Lobby {
     code: row.code,
     name: row.name,
     hostParticipantId: row.host_participant_id,
+    hostUserId: row.host_user_id ?? undefined,
     adminPin: row.admin_pin ?? undefined,
+    year: row.year ?? 2026,
     roundLimit: row.round_limit ?? 7,
     status: row.status,
     createdAt: row.created_at,
@@ -33,6 +37,7 @@ function toLobby(row: LobbyRow): Lobby {
 function normalizeLobby(lobby: Lobby): Lobby {
   return {
     ...lobby,
+    year: lobby.year ?? 2026,
     roundLimit: lobby.roundLimit ?? 1,
   };
 }
@@ -43,7 +48,9 @@ function toLobbyRow(lobby: Lobby): LobbyRow {
     code: lobby.code,
     name: lobby.name,
     host_participant_id: lobby.hostParticipantId,
+    host_user_id: lobby.hostUserId ?? null,
     admin_pin: lobby.adminPin ?? null,
+    year: lobby.year ?? 2026,
     round_limit: lobby.roundLimit ?? 1,
     status: lobby.status,
     created_at: lobby.createdAt,

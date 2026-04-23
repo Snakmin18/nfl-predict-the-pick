@@ -8,6 +8,7 @@ type DraftRow = {
   id: string;
   lobby_id: string | null;
   participant_id: string | null;
+  user_id: string | null;
   title: string;
   year: number;
   created_at: string;
@@ -20,6 +21,7 @@ type DraftPickRow = {
   draft_id: string;
   pick_number: number;
   team_id: string;
+  starting_team_id: string | null;
   original_owner_team_id: string | null;
   predicted_player: Prospect | null;
 };
@@ -33,6 +35,7 @@ function toDraft(row: DraftWithPickRows): MockDraft {
     id: row.id,
     lobbyId: row.lobby_id ?? undefined,
     participantId: row.participant_id ?? undefined,
+    userId: row.user_id ?? undefined,
     title: row.title,
     year: row.year,
     createdAt: row.created_at,
@@ -50,6 +53,7 @@ function toDraftRow(draft: MockDraft): DraftRow {
     id: draft.id,
     lobby_id: draft.lobbyId ?? null,
     participant_id: draft.participantId ?? null,
+    user_id: draft.userId ?? null,
     title: draft.title,
     year: draft.year,
     created_at: draft.createdAt,
@@ -63,6 +67,7 @@ function toDraftPick(row: DraftPickRow): DraftPick {
   return {
     pickNumber: row.pick_number,
     teamId: row.team_id,
+    startingTeamId: row.starting_team_id ?? row.team_id,
     originalOwnerTeamId: row.original_owner_team_id ?? undefined,
     predictedPlayer: row.predicted_player,
   };
@@ -73,6 +78,7 @@ function toDraftPickRow(draftId: string, pick: DraftPick): DraftPickRow {
     draft_id: draftId,
     pick_number: pick.pickNumber,
     team_id: pick.teamId,
+    starting_team_id: pick.startingTeamId ?? pick.teamId,
     original_owner_team_id: pick.originalOwnerTeamId ?? null,
     predicted_player: pick.predictedPlayer,
   };
@@ -158,4 +164,17 @@ export async function getAllDrafts(): Promise<MockDraft[]> {
 
   if (error) throw error;
   return (data as DraftWithPickRows[]).map(toDraft);
+}
+
+export async function loadOfficialDraft(
+  year: number,
+): Promise<MockDraft | null> {
+  const allDrafts = await getAllDrafts();
+
+  return (
+    allDrafts.find(
+      (draft) =>
+        draft.isOfficialResult && draft.year === year && !draft.lobbyId,
+    ) ?? null
+  );
 }

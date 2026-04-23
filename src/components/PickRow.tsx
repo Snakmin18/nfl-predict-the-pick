@@ -1,25 +1,31 @@
 import type { DraftPick } from "../types/draft";
+import type { Prospect } from "../types/prospect";
 import type { ScoredPick } from "../utils/scoring";
 import { formatTeamLabel } from "../utils/teams";
+import ProspectPicker from "./ProspectPicker";
 
 type Props = {
   pick: DraftPick;
   scoredPick?: ScoredPick;
+  availableProspects: Prospect[];
   isLocked?: boolean;
   isSelected: boolean;
   onSelectPick: (pickNumber: number) => void;
   onClearPick: (pickNumber: number) => void;
   onOpenTrade: (pickNumber: number) => void;
+  onDraftProspect: (prospect: Prospect) => void;
 };
 
 export default function PickRow({
   pick,
   scoredPick,
+  availableProspects,
   isLocked = false,
   isSelected,
   onSelectPick,
   onClearPick,
   onOpenTrade,
+  onDraftProspect,
 }: Props) {
   return (
     <div
@@ -50,8 +56,14 @@ export default function PickRow({
 
       {scoredPick?.officialPlayer && (
         <div className="pick-row__score">
-          <strong>+{scoredPick.points}</strong>{" "}
+          <strong>+{scoredPick.playerPoints}</strong>{" "}
           Official: {scoredPick.officialPlayer.name}
+        </div>
+      )}
+
+      {scoredPick?.tradePredictedSuccessfully && (
+        <div className="pick-row__trade-hit">
+          Trade predicted successfully (+{scoredPick.tradePoints})
         </div>
       )}
 
@@ -87,6 +99,23 @@ export default function PickRow({
               Clear Pick
             </button>
           )}
+        </div>
+      )}
+
+      {!isLocked && isSelected && (
+        <div
+          className="pick-row__mobile-picker"
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
+        >
+          <ProspectPicker
+            prospects={availableProspects}
+            selectedPickNumber={pick.pickNumber}
+            isLocked={isLocked}
+            resultLimit={6}
+            inputId={`mobile-prospect-search-${pick.pickNumber}`}
+            onDraftProspect={onDraftProspect}
+          />
         </div>
       )}
     </div>

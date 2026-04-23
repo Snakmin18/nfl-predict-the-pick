@@ -17,10 +17,12 @@ function preserveOriginalOwner(
   newOwnerTeamId: string,
 ): DraftPick {
   const originalOwnerTeamId = pick.originalOwnerTeamId ?? pick.teamId;
+  const startingTeamId = pick.startingTeamId ?? pick.teamId;
 
   return {
     ...pick,
     teamId: newOwnerTeamId,
+    startingTeamId,
     originalOwnerTeamId,
   };
 }

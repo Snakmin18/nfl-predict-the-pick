@@ -6,6 +6,7 @@ const PARTICIPANT_PREFIX = "participant:";
 type ParticipantRow = {
   id: string;
   lobby_id: string;
+  user_id: string | null;
   name: string;
   role: Participant["role"];
   joined_at: string;
@@ -15,6 +16,7 @@ function toParticipant(row: ParticipantRow): Participant {
   return {
     id: row.id,
     lobbyId: row.lobby_id,
+    userId: row.user_id ?? undefined,
     name: row.name,
     role: row.role,
     joinedAt: row.joined_at,
@@ -25,6 +27,7 @@ function toParticipantRow(participant: Participant): ParticipantRow {
   return {
     id: participant.id,
     lobby_id: participant.lobbyId,
+    user_id: participant.userId ?? null,
     name: participant.name,
     role: participant.role,
     joined_at: participant.joinedAt,
@@ -74,6 +77,31 @@ function getParticipantsByLobbyLocally(lobbyId: string): Participant[] {
   );
 }
 
+function getParticipantsByUserLocally(userId: string): Participant[] {
+  const participants: Participant[] = [];
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith(PARTICIPANT_PREFIX)) continue;
+
+    const raw = localStorage.getItem(key);
+    if (!raw) continue;
+
+    try {
+      const participant = JSON.parse(raw) as Participant;
+      if (participant.userId === userId) {
+        participants.push(participant);
+      }
+    } catch {
+      // skip invalid entries
+    }
+  }
+
+  return participants.sort(
+    (a, b) => new Date(b.joinedAt).getTime() - new Date(a.joinedAt).getTime(),
+  );
+}
+
 export async function saveParticipant(participant: Participant) {
   saveParticipantLocally(participant);
 
@@ -111,6 +139,21 @@ export async function getParticipantsByLobby(
     .select("*")
     .eq("lobby_id", lobbyId)
     .order("joined_at", { ascending: true });
+
+  if (error) throw error;
+  return (data as ParticipantRow[]).map(toParticipant);
+}
+
+export async function getParticipantsByUser(
+  userId: string,
+): Promise<Participant[]> {
+  if (!supabase) return getParticipantsByUserLocally(userId);
+
+  const { data, error } = await supabase
+    .from("participants")
+    .select("*")
+    .eq("user_id", userId)
+    .order("joined_at", { ascending: false });
 
   if (error) throw error;
   return (data as ParticipantRow[]).map(toParticipant);

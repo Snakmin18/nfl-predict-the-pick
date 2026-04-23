@@ -1,4 +1,5 @@
 import type { MockDraft } from "../types/draft";
+import type { Prospect } from "../types/prospect";
 import { getDraftRoundLimit, getRoundForPick } from "../utils/draft";
 import type { DraftScore } from "../utils/scoring";
 import PickRow from "./PickRow";
@@ -6,21 +7,25 @@ import PickRow from "./PickRow";
 type Props = {
   draft: MockDraft;
   score?: DraftScore;
+  availableProspects: Prospect[];
   isLocked?: boolean;
   selectedPickNumber: number | null;
   onSelectPick: (pickNumber: number) => void;
   onClearPick: (pickNumber: number) => void;
   onOpenTrade: (pickNumber: number) => void;
+  onDraftProspect: (prospect: Prospect) => void;
 };
 
 export default function DraftBoard({
   draft,
   score,
+  availableProspects,
   isLocked = false,
   selectedPickNumber,
   onSelectPick,
   onClearPick,
   onOpenTrade,
+  onDraftProspect,
 }: Props) {
   const roundLimit = getDraftRoundLimit(draft);
   const selectedRound = selectedPickNumber
@@ -67,11 +72,13 @@ export default function DraftBoard({
           key={pick.pickNumber}
           pick={pick}
           scoredPick={scoredPicksByPickNumber.get(pick.pickNumber)}
+          availableProspects={availableProspects}
           isLocked={isLocked}
           isSelected={selectedPickNumber === pick.pickNumber}
           onSelectPick={onSelectPick}
           onClearPick={onClearPick}
           onOpenTrade={onOpenTrade}
+          onDraftProspect={onDraftProspect}
         />
       ))}
     </div>

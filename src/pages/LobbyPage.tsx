@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import CountdownTimer from "../components/CountdownTimer";
 import { loadLobby, loadStoredAdminPin } from "../utils/lobbyStorage";
 import {
   getParticipantsByLobby,
   loadParticipant,
 } from "../utils/participantStorage";
-import { getAllDrafts, saveDraft } from "../utils/draftStorage";
+import {
+  getAllDrafts,
+  loadOfficialDraft,
+  saveDraft,
+} from "../utils/draftStorage";
 import { loadDraftOrder } from "../utils/draftOrderStorage";
 import { buildDraft } from "../utils/draft";
 import { scoreLobbyDrafts } from "../utils/scoring";
+import { getCurrentUserId } from "../utils/auth";
+import { DRAFT_SUBMISSION_DEADLINE } from "../utils/deadlines";
+import { supabase } from "../utils/supabaseClient";
 import type { Lobby, Participant } from "../types/lobby";
 import type { MockDraft } from "../types/draft";
 
@@ -20,6 +28,7 @@ export default function LobbyPage() {
   const [participant, setParticipant] = useState<Participant | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [drafts, setDrafts] = useState<MockDraft[]>([]);
+  const [officialDraft, setOfficialDraft] = useState<MockDraft | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -40,13 +49,21 @@ export default function LobbyPage() {
         const loadedParticipants = loadedLobby
           ? await getParticipantsByLobby(loadedLobby.id)
           : [];
+        const loadedOfficialDraft = loadedLobby
+          ? await loadOfficialDraft(loadedLobby.year)
+          : null;
 
         if (!isMounted) return;
 
         setLobby(loadedLobby);
         setParticipant(loadedParticipant);
         setParticipants(loadedParticipants);
-        setDrafts(allDrafts.filter((draft) => draft.lobbyId === lobbyId));
+        setDrafts(
+          allDrafts.filter(
+            (draft) => draft.lobbyId === lobbyId && !draft.isOfficialResult,
+          ),
+        );
+        setOfficialDraft(loadedOfficialDraft);
       } catch {
         if (isMounted) setLoadError("Unable to load room.");
       } finally {
@@ -60,6 +77,89 @@ export default function LobbyPage() {
       isMounted = false;
     };
   }, [lobbyId, participantId]);
+
+  const lobbyYear = lobby?.year;
+  const officialDraftId = officialDraft?.id;
+
+  useEffect(() => {
+    if (!supabase || !lobbyYear) return;
+
+    const realtimeClient = supabase;
+    let isSubscribed = true;
+    let refreshTimer: number | undefined;
+
+    const refreshOfficialDraft = () => {
+      window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(async () => {
+        try {
+          const updatedOfficialDraft = await loadOfficialDraft(lobbyYear);
+          if (isSubscribed) setOfficialDraft(updatedOfficialDraft);
+        } catch {
+          // Realtime refreshes are opportunistic; the current scoreboard remains usable.
+        }
+      }, 300);
+    };
+
+    const officialDraftChannel = realtimeClient
+      .channel(`lobby-official-draft-${lobbyYear}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "drafts",
+          filter: `year=eq.${lobbyYear}`,
+        },
+        refreshOfficialDraft,
+      )
+      .subscribe();
+
+    return () => {
+      isSubscribed = false;
+      window.clearTimeout(refreshTimer);
+      void realtimeClient.removeChannel(officialDraftChannel);
+    };
+  }, [lobbyYear]);
+
+  useEffect(() => {
+    if (!supabase || !lobbyYear || !officialDraftId) return;
+
+    const realtimeClient = supabase;
+    let isSubscribed = true;
+    let refreshTimer: number | undefined;
+
+    const refreshOfficialDraft = () => {
+      window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(async () => {
+        try {
+          const updatedOfficialDraft = await loadOfficialDraft(lobbyYear);
+          if (isSubscribed) setOfficialDraft(updatedOfficialDraft);
+        } catch {
+          // Realtime refreshes are opportunistic; the current scoreboard remains usable.
+        }
+      }, 300);
+    };
+
+    const officialPicksChannel = realtimeClient
+      .channel(`lobby-official-draft-picks-${officialDraftId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "draft_picks",
+          filter: `draft_id=eq.${officialDraftId}`,
+        },
+        refreshOfficialDraft,
+      )
+      .subscribe();
+
+    return () => {
+      isSubscribed = false;
+      window.clearTimeout(refreshTimer);
+      void realtimeClient.removeChannel(officialPicksChannel);
+    };
+  }, [lobbyYear, officialDraftId]);
 
   if (isLoading) {
     return (
@@ -88,17 +188,13 @@ export default function LobbyPage() {
   }
 
   const participantDraft = drafts.find(
-    (draft) =>
-      draft.participantId === participant.id && !draft.isOfficialResult,
+    (draft) => draft.participantId === participant.id,
   );
-  const officialDraft = drafts.find((draft) => draft.isOfficialResult);
-  const scores = scoreLobbyDrafts(drafts, participants, officialDraft);
+  const scores = scoreLobbyDrafts(drafts, participants, officialDraft ?? undefined);
   const submittedDraftCount = drafts.filter(
-    (draft) => !draft.isOfficialResult && draft.submittedAt,
+    (draft) => draft.submittedAt,
   ).length;
-  const participantDraftCount = drafts.filter(
-    (draft) => !draft.isOfficialResult,
-  ).length;
+  const participantDraftCount = drafts.length;
   const navigationState = location.state as { adminPin?: string } | null;
   const knownAdminPin =
     navigationState?.adminPin ?? loadStoredAdminPin(lobby.id);
@@ -106,20 +202,12 @@ export default function LobbyPage() {
   const handleCreateDraft = async () => {
     const draftOrder = loadDraftOrder();
     const title = `${participant.name}'s Draft`;
+    const userId = await getCurrentUserId();
     const draft = buildDraft(title, draftOrder, {
       lobbyId: lobby.id,
       participantId: participant.id,
-      roundLimit: lobby.roundLimit,
-    });
-    await saveDraft(draft);
-    navigate(`/draft/${draft.id}`);
-  };
-
-  const handleCreateOfficialDraft = async () => {
-    const draftOrder = loadDraftOrder();
-    const draft = buildDraft("Official Results", draftOrder, {
-      lobbyId: lobby.id,
-      isOfficialResult: true,
+      userId,
+      year: lobby.year,
       roundLimit: lobby.roundLimit,
     });
     await saveDraft(draft);
@@ -139,52 +227,60 @@ export default function LobbyPage() {
           {lobby.roundLimit === 1 ? "Round 1 only" : `Rounds 1-${lobby.roundLimit}`}
         </strong>
       </p>
+      <CountdownTimer deadline={DRAFT_SUBMISSION_DEADLINE} />
 
       <div className="card">
         <h2>Welcome, {participant.name}</h2>
         <p>
-          You are logged in as <strong>{participant.role}</strong>.
+          You are logged in as{" "}
+          <strong>{participant.role === "admin" ? "host" : "player"}</strong>.
         </p>
-        {participant.role === "admin" ? (
-          <div>
+        {participant.role === "admin" && (
+          <>
             <p>
-              As admin, you can create the official results draft or review the
-              room drafts.
+              As host, you can review room drafts and keep track of who has
+              submitted.
             </p>
             {knownAdminPin && (
               <p>
-                Admin PIN: <strong>{knownAdminPin}</strong>
+                Host PIN: <strong>{knownAdminPin}</strong>
               </p>
             )}
-            {officialDraft ? (
-              <Link
-                to={`/draft/${officialDraft.id}`}
-                state={{ viewerParticipantId: participant.id }}
-              >
-                Open official results draft
-              </Link>
-            ) : (
-              <button onClick={handleCreateOfficialDraft}>
-                Create Official Results Draft
-              </button>
-            )}
+          </>
+        )}
+
+        <p>
+          Submit your predictions and compare against the official results after
+          each round.
+        </p>
+
+        <div className="scoring-guide">
+          <h3>Scoring</h3>
+          <div className="scoring-guide__grid">
+            <span>Exact pick</span>
+            <strong>100 pts</strong>
+            <span>1 pick off</span>
+            <strong>75 pts</strong>
+            <span>2 picks off</span>
+            <strong>50 pts</strong>
+            <span>3 picks off</span>
+            <strong>25 pts</strong>
+            <span>Correct trade</span>
+            <strong>+50 pts</strong>
           </div>
+        </div>
+
+        {participantDraft ? (
+          <Link
+            to={`/draft/${participantDraft.id}`}
+            state={{ viewerParticipantId: participant.id }}
+          >
+            {participantDraft.submittedAt
+              ? "Open your submitted draft"
+              : "Open your draft"}
+          </Link>
         ) : (
-          <div>
-            <p>
-              Submit your predictions and compare against the official results
-              after each round.
-            </p>
-            {participantDraft ? (
-              <Link to={`/draft/${participantDraft.id}`}>
-                {participantDraft.submittedAt
-                  ? "Open your submitted draft"
-                  : "Open your draft"}
-              </Link>
-            ) : (
-              <button onClick={handleCreateDraft}>Create Your Draft</button>
-            )}
-          </div>
+          <button onClick={handleCreateDraft}>Create Your Draft</button>
         )}
       </div>
 
@@ -206,7 +302,10 @@ export default function LobbyPage() {
           Submitted drafts: {submittedDraftCount}/{participantDraftCount}
         </p>
         {!officialDraft ? (
-          <p>Create the official results draft to start scoring.</p>
+          <p>
+            The official {lobby.year} draft has not been created yet. Scores
+            will appear once the app admin starts saving official picks.
+          </p>
         ) : scores.length === 0 ? (
           <p>No submitted participant drafts yet.</p>
         ) : (
@@ -225,10 +324,10 @@ export default function LobbyPage() {
               >
                 <span>{score.participantName}</span>
                 <strong>
-                  {score.points}/{score.completedOfficialPicks * 100}
+                  {score.points}/{score.availablePoints}
                 </strong>
                 <span>
-                  {score.completedOfficialPicks}/{score.possiblePoints / 100}
+                  {score.completedOfficialPicks}/{score.scoredPicks.length}
                 </span>
               </Link>
             ))}
@@ -249,11 +348,7 @@ export default function LobbyPage() {
                   state={{ viewerParticipantId: participant.id }}
                 >
                   {draft.title}{" "}
-                  {draft.isOfficialResult
-                    ? "(Official Results)"
-                    : draft.submittedAt
-                      ? "(Submitted)"
-                      : "(Not submitted)"}
+                  {draft.submittedAt ? "(Submitted)" : "(Not submitted)"}
                 </Link>
               </li>
             ))}

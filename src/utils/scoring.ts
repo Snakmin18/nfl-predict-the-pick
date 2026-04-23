@@ -6,10 +6,13 @@ import { getDraftRoundLimit, getRoundForPick } from "./draft";
 export type ScoredPick = {
   pickNumber: number;
   points: number;
+  playerPoints: number;
+  tradePoints: number;
   predictedPlayer: Prospect | null;
   officialPlayer: Prospect | null;
   officialPickNumber: number | null;
   pickDistance: number | null;
+  tradePredictedSuccessfully: boolean;
 };
 
 export type DraftScore = {
@@ -19,7 +22,9 @@ export type DraftScore = {
   participantName: string;
   points: number;
   possiblePoints: number;
+  availablePoints: number;
   completedOfficialPicks: number;
+  completedOfficialTrades: number;
   scoredPicks: ScoredPick[];
 };
 
@@ -34,6 +39,28 @@ function getPointsForPickDistance(pickDistance: number | null) {
   if (pickDistance === 2) return 50;
   if (pickDistance === 3) return 25;
   return 0;
+}
+
+function isTradedPick(
+  pick: { teamId: string; startingTeamId?: string } | undefined,
+) {
+  return Boolean(pick && pick.teamId !== (pick.startingTeamId ?? pick.teamId));
+}
+
+function isTradePredictedSuccessfully(
+  pick: { teamId: string; startingTeamId?: string },
+  officialPick: { teamId: string; startingTeamId?: string } | undefined,
+) {
+  const startingTeamId = pick.startingTeamId ?? pick.teamId;
+  const officialStartingTeamId =
+    officialPick?.startingTeamId ?? officialPick?.teamId;
+
+  return (
+    isTradedPick(pick) &&
+    isTradedPick(officialPick) &&
+    pick.teamId === officialPick?.teamId &&
+    startingTeamId === officialStartingTeamId
+  );
 }
 
 export function scoreDraft(
@@ -68,17 +95,30 @@ export function scoreDraft(
         officialPickNumber === null
           ? null
           : Math.abs(officialPickNumber - pick.pickNumber);
-      const points = getPointsForPickDistance(pickDistance);
+      const playerPoints = getPointsForPickDistance(pickDistance);
+      const tradePredictedSuccessfully = isTradePredictedSuccessfully(
+        pick,
+        officialPick,
+      );
+      const tradePoints = tradePredictedSuccessfully ? 50 : 0;
 
       return {
         pickNumber: pick.pickNumber,
-        points,
+        points: playerPoints + tradePoints,
+        playerPoints,
+        tradePoints,
         predictedPlayer: pick.predictedPlayer,
         officialPlayer,
         officialPickNumber,
         pickDistance,
+        tradePredictedSuccessfully,
       };
     });
+  const completedOfficialPicks = scoredPicks.filter((pick) => pick.officialPlayer)
+    .length;
+  const completedOfficialTrades = officialDraft.picks.filter(
+    (pick) => getRoundForPick(pick.pickNumber) <= roundLimit && isTradedPick(pick),
+  ).length;
 
   return {
     draftId: draft.id,
@@ -86,9 +126,10 @@ export function scoreDraft(
     participantId: draft.participantId,
     participantName: participant?.name ?? draft.title,
     points: scoredPicks.reduce((total, pick) => total + pick.points, 0),
-    possiblePoints: scoredPicks.length * 100,
-    completedOfficialPicks: scoredPicks.filter((pick) => pick.officialPlayer)
-      .length,
+    possiblePoints: scoredPicks.length * 100 + completedOfficialTrades * 50,
+    availablePoints: completedOfficialPicks * 100 + completedOfficialTrades * 50,
+    completedOfficialPicks,
+    completedOfficialTrades,
     scoredPicks,
   };
 }

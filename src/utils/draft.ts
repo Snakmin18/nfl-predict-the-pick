@@ -52,22 +52,26 @@ export function buildDraft(
   options?: {
     lobbyId?: string;
     participantId?: string;
+    userId?: string;
     isOfficialResult?: boolean;
     roundLimit?: number;
+    year?: number;
   },
 ): MockDraft {
   return {
     id: crypto.randomUUID(),
     title,
-    year: 2026,
+    year: options?.year ?? 2026,
     createdAt: new Date().toISOString(),
     lobbyId: options?.lobbyId,
     participantId: options?.participantId,
+    userId: options?.userId,
     isOfficialResult: options?.isOfficialResult,
     roundLimit: options?.roundLimit,
     picks: draftOrder.map((item) => ({
       pickNumber: item.pickNumber,
       teamId: item.teamId,
+      startingTeamId: item.teamId,
       originalOwnerTeamId: item.originalOwnerTeamId,
       predictedPlayer: null,
     })),

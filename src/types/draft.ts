@@ -9,6 +9,7 @@ export type DraftOrderItem = {
 export type DraftPick = {
   pickNumber: number;
   teamId: string;
+  startingTeamId?: string;
   originalOwnerTeamId?: string;
   predictedPlayer: Prospect | null;
 };
@@ -20,6 +21,7 @@ export type MockDraft = {
   createdAt: string;
   lobbyId?: string;
   participantId?: string;
+  userId?: string;
   isOfficialResult?: boolean;
   roundLimit?: number;
   submittedAt?: string;

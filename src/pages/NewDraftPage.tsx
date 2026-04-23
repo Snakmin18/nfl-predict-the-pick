@@ -21,7 +21,9 @@ export default function NewDraftPage() {
 
     getAllDrafts()
       .then((loadedDrafts) => {
-        if (isMounted) setDrafts(loadedDrafts);
+        if (isMounted) {
+          setDrafts(loadedDrafts.filter((draft) => !draft.isOfficialResult));
+        }
       })
       .catch(() => {
         if (isMounted) setError("Unable to load drafts.");

@@ -4,6 +4,7 @@ import NewDraftPage from "./pages/NewDraftPage";
 import DraftPage from "./pages/DraftPage";
 import LobbyPage from "./pages/LobbyPage";
 import AdminDraftOrderPage from "./pages/AdminDraftOrderPage";
+import OfficialDraftPage from "./pages/OfficialDraftPage";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/draft/:draftId" element={<DraftPage />} />
         <Route path="/new" element={<NewDraftPage />} />
         <Route path="/admin/draft-order" element={<AdminDraftOrderPage />} />
+        <Route path="/admin/official-draft" element={<OfficialDraftPage />} />
       </Routes>
     </BrowserRouter>
   );

@@ -27,10 +27,77 @@ button {
   font: inherit;
 }
 
+.site-header {
+  align-items: center;
+  background: #0f172a;
+  border-bottom: 1px solid #374151;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr);
+  min-height: 68px;
+  padding: 14px 24px;
+}
+
+.site-header__brand {
+  color: white;
+  font-size: 22px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.site-header__nav {
+  justify-self: center;
+}
+
+.site-header__nav a {
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  color: #dbeafe;
+  display: inline-block;
+  font-weight: 700;
+  padding: 9px 12px;
+  text-decoration: none;
+}
+
+.site-header__nav a:hover {
+  border-color: #60a5fa;
+}
+
+.site-header__account {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-self: end;
+  min-width: 0;
+}
+
+.site-header__account span {
+  color: #d1d5db;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.site-header__account button {
+  background: #2563eb;
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  flex: 0 0 auto;
+  padding: 9px 12px;
+}
+
 .page {
   max-width: 900px;
   margin: 0 auto;
   padding: 24px;
+}
+
+.page-intro {
+  color: #d1d5db;
+  font-size: 18px;
+  margin-top: 0;
 }
 
 .card {
@@ -57,6 +124,22 @@ button {
   border-radius: 8px;
   background: #2563eb;
   color: white;
+}
+
+.card .secondary-button {
+  background: #374151;
+}
+
+.auth-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.auth-card h2,
+.auth-card p {
+  margin: 0;
 }
 
 .accordion-card {
@@ -91,6 +174,45 @@ button {
   padding: 16px;
 }
 
+.my-lobbies {
+  display: grid;
+  gap: 10px;
+}
+
+.my-lobbies__item {
+  align-items: center;
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  color: white;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 12px;
+  text-decoration: none;
+}
+
+.my-lobbies__item:hover {
+  border-color: #60a5fa;
+}
+
+.my-lobbies__code {
+  color: #d1d5db;
+  display: block;
+  font-size: 14px;
+  margin-top: 3px;
+}
+
+.my-lobbies__role {
+  background: #374151;
+  border-radius: 999px;
+  color: #dbeafe;
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 9px;
+}
+
 .pick-row {
   background: #1f2937;
   padding: 16px;
@@ -116,6 +238,18 @@ button {
 
 .pick-row__score strong {
   color: #86efac;
+}
+
+.pick-row__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.pick-row__trade-hit {
+  color: #86efac;
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 
 .pick-row input {
@@ -249,6 +383,69 @@ select {
   color: #d1d5db;
 }
 
+.countdown {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin: 16px 0;
+  padding: 12px;
+}
+
+.countdown__label {
+  color: #d1d5db;
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.countdown strong {
+  color: white;
+}
+
+.countdown p {
+  color: #d1d5db;
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+.countdown--expired {
+  border-color: #f87171;
+}
+
+.countdown--expired strong {
+  color: #fca5a5;
+}
+
+.scoring-guide {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  margin: 14px 0;
+  padding: 12px;
+}
+
+.scoring-guide h3 {
+  font-size: 16px;
+  margin: 0 0 10px;
+}
+
+.scoring-guide__grid {
+  display: grid;
+  gap: 8px 12px;
+  grid-template-columns: 1fr auto;
+}
+
+.scoring-guide__grid span {
+  color: #d1d5db;
+}
+
+.scoring-guide__grid strong {
+  color: #86efac;
+}
+
 .scoreboard {
   display: grid;
   gap: 8px;
@@ -291,6 +488,10 @@ select {
 .pick-row--selected {
   border-color: #60a5fa;
   box-shadow: 0 0 0 1px #60a5fa;
+}
+
+.pick-row__mobile-picker {
+  display: none;
 }
 
 .prospects-panel {
@@ -360,8 +561,52 @@ select {
     grid-template-columns: 1fr;
   }
 
-  .prospects-panel {
-    position: static;
+  .draft-layout__right {
+    display: none;
+  }
+
+  .pick-row__mobile-picker {
+    border-top: 1px solid #374151;
+    display: block;
+    margin-top: 14px;
+    padding-top: 14px;
+  }
+
+  .pick-row__mobile-picker .prospects-grid {
+    gap: 8px;
+  }
+
+  .pick-row__mobile-picker .prospect-card {
+    padding: 10px;
+  }
+
+  .pick-row__mobile-picker .prospect-card__meta {
+    margin-bottom: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .site-header {
+    align-items: flex-start;
+    grid-template-columns: 1fr;
+  }
+
+  .site-header__nav,
+  .site-header__account {
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .site-header__nav a {
+    width: 100%;
+  }
+
+  .site-header__account span {
+    flex: 1 1 auto;
+  }
+
+  .countdown {
+    flex-direction: column;
   }
 }
 
