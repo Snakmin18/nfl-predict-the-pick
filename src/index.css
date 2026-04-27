@@ -241,7 +241,6 @@ select {
 .draft-layout__right {
   min-width: 0;
 }
-
 @media (max-width: 900px) {
   .draft-layout {
     grid-template-columns: 1fr;
