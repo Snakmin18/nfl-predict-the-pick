@@ -1,4 +1,4 @@
-import { supabase } from "./supabaseClient";
+import { supabase } from "../lib/supabase/client";
 import { saveProfile } from "./profileStorage";
 
 const LOCAL_USER_ID_KEY = "local-user-id";

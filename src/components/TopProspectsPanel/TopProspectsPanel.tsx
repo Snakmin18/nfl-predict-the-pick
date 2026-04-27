@@ -1,5 +1,6 @@
-import type { Prospect } from "../types/prospect";
-import ProspectPicker from "./ProspectPicker";
+import type { Prospect } from "../../types/prospect";
+import ProspectPicker from "../ProspectPicker/ProspectPicker";
+import styles from "./TopProspectsPanel.module.css";
 
 type Props = {
   prospects: Prospect[];
@@ -15,7 +16,7 @@ export default function TopProspectsPanel({
   onDraftProspect,
 }: Props) {
   return (
-    <aside className="prospects-panel">
+    <aside className={styles.panel}>
       <h2>Top Available Prospects</h2>
       <p>
         {selectedPickNumber

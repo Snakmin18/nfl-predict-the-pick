@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { MockDraft } from "../types/draft";
-import { getAllDrafts, saveDraft } from "../utils/draftStorage";
+import { getAllDrafts, saveDraft } from "../repositories/draftRepository";
 import { loadDraftOrder } from "../utils/draftOrderStorage";
 import { buildDraft } from "../utils/draft";
 

@@ -1,8 +1,9 @@
-import type { DraftPick } from "../types/draft";
-import type { Prospect } from "../types/prospect";
-import type { ScoredPick } from "../utils/scoring";
-import { formatTeamLabel } from "../utils/teams";
-import ProspectPicker from "./ProspectPicker";
+import type { DraftPick } from "../../types/draft";
+import type { Prospect } from "../../types/prospect";
+import type { ScoredPick } from "../../utils/scoring";
+import { formatTeamLabel } from "../../utils/teams";
+import ProspectPicker from "../ProspectPicker/ProspectPicker";
+import styles from "./PickRow.module.css";
 
 type Props = {
   pick: DraftPick;
@@ -29,7 +30,7 @@ export default function PickRow({
 }: Props) {
   return (
     <div
-      className={`pick-row ${isSelected ? "pick-row--selected" : ""}`}
+      className={`${styles.row} ${isSelected ? styles.selected : ""}`.trim()}
       onClick={() => onSelectPick(pick.pickNumber)}
       role="button"
       tabIndex={0}
@@ -39,7 +40,7 @@ export default function PickRow({
         }
       }}
     >
-      <div className="pick-row__top">
+      <div className={styles.top}>
         <div>
           <strong>#{pick.pickNumber}</strong>
         </div>
@@ -47,7 +48,7 @@ export default function PickRow({
         <div>{formatTeamLabel(pick.teamId, pick.originalOwnerTeamId)}</div>
       </div>
 
-      <div className="pick-row__current">
+      <div className={styles.current}>
         <strong>Prediction:</strong>{" "}
         {pick.predictedPlayer
           ? `${pick.predictedPlayer.name} (${pick.predictedPlayer.position ?? "N/A"}, ${pick.predictedPlayer.school})`
@@ -55,20 +56,20 @@ export default function PickRow({
       </div>
 
       {scoredPick?.officialPlayer && (
-        <div className="pick-row__score">
-          <strong>+{scoredPick.playerPoints}</strong>{" "}
-          Official: {scoredPick.officialPlayer.name}
+        <div className={styles.score}>
+          <strong>+{scoredPick.playerPoints}</strong> Official:{" "}
+          {scoredPick.officialPlayer.name}
         </div>
       )}
 
       {scoredPick?.tradePredictedSuccessfully && (
-        <div className="pick-row__trade-hit">
+        <div className={styles.tradeHit}>
           Trade predicted successfully (+{scoredPick.tradePoints})
         </div>
       )}
 
       {scoredPick?.officialPickNumber && pick.predictedPlayer && (
-        <div className="pick-row__score">
+        <div className={styles.score}>
           {pick.predictedPlayer.name} went #{scoredPick.officialPickNumber}
           {scoredPick.pickDistance !== null
             ? ` (${scoredPick.pickDistance} pick${scoredPick.pickDistance === 1 ? "" : "s"} off)`
@@ -77,7 +78,7 @@ export default function PickRow({
       )}
 
       {!isLocked && (
-        <div className="pick-row__actions">
+        <div className={styles.actions}>
           <button
             type="button"
             onClick={(e) => {
@@ -104,7 +105,7 @@ export default function PickRow({
 
       {!isLocked && isSelected && (
         <div
-          className="pick-row__mobile-picker"
+          className={styles.mobilePicker}
           onClick={(event) => event.stopPropagation()}
           onKeyDown={(event) => event.stopPropagation()}
         >
@@ -113,6 +114,7 @@ export default function PickRow({
             selectedPickNumber={pick.pickNumber}
             isLocked={isLocked}
             resultLimit={6}
+            compact
             inputId={`mobile-prospect-search-${pick.pickNumber}`}
             onDraftProspect={onDraftProspect}
           />

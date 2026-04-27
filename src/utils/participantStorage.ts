@@ -1,5 +1,5 @@
 import type { Participant } from "../types/lobby";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../lib/supabase/client";
 
 const PARTICIPANT_PREFIX = "participant:";
 

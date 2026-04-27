@@ -1,6 +1,6 @@
 import type { DraftPick, MockDraft } from "../types/draft";
 import type { Prospect } from "../types/prospect";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../lib/supabase/client";
 
 const DRAFT_PREFIX = "draft:";
 

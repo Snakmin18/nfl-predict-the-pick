@@ -1,6 +1,7 @@
 import { useState } from "react";
-import type { AuthUser } from "../utils/auth";
-import { signInWithEmail, signOut, signUpWithEmail } from "../utils/auth";
+import type { AuthUser } from "../../utils/auth";
+import { signInWithEmail, signOut, signUpWithEmail } from "../../utils/auth";
+import styles from "./AuthPanel.module.css";
 
 type Props = {
   user: AuthUser | null;
@@ -35,7 +36,9 @@ export default function AuthPanel({ user, onAuthChange }: Props) {
       );
       setPassword("");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Authentication failed.");
+      setStatus(
+        error instanceof Error ? error.message : "Authentication failed.",
+      );
     }
   };
 
@@ -51,7 +54,7 @@ export default function AuthPanel({ user, onAuthChange }: Props) {
 
   if (user) {
     return (
-      <div className="card auth-card">
+      <div className={`card ${styles.signedInCard}`}>
         <div>
           <h2>Account</h2>
           <p>{user.email ?? "Signed in"}</p>
@@ -93,7 +96,7 @@ export default function AuthPanel({ user, onAuthChange }: Props) {
         onChange={(event) => setPassword(event.target.value)}
         placeholder="Password"
       />
-      <div className="draft-actions">
+      <div className={styles.actions}>
         <button type="button" onClick={handleSubmit}>
           {mode === "sign-in" ? "Sign In" : "Create Account"}
         </button>

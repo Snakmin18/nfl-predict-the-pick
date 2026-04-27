@@ -5,7 +5,7 @@ import { buildDraft } from "../utils/draft";
 import {
   loadOfficialDraft,
   saveDraft,
-} from "../utils/draftStorage";
+} from "../repositories/draftRepository";
 import { getAuthUser } from "../utils/auth";
 import { loadProfile } from "../utils/profileStorage";
 

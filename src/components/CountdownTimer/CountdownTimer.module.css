@@ -1,0 +1,41 @@
+.countdown {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin: 16px 0;
+  padding: 12px;
+}
+
+.label {
+  color: #d1d5db;
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.countdown strong {
+  color: white;
+}
+
+.countdown p {
+  color: #d1d5db;
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+.expired {
+  border-color: #f87171;
+}
+
+.expired strong {
+  color: #fca5a5;
+}
+
+@media (max-width: 640px) {
+  .countdown {
+    flex-direction: column;
+  }
+}

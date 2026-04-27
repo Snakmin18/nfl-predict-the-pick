@@ -1,0 +1,7 @@
+.panel {
+  background: #1f2937;
+  padding: 16px;
+  border-radius: 12px;
+  position: sticky;
+  top: 16px;
+}

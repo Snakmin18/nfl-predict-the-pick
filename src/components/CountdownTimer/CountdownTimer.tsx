@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import styles from "./CountdownTimer.module.css";
 
 type Props = {
   deadline: Date;
@@ -48,17 +49,21 @@ export default function CountdownTimer({ deadline }: Props) {
   const isExpired = timeRemaining <= 0;
 
   return (
-    <div className={`countdown ${isExpired ? "countdown--expired" : ""}`}>
+    <div
+      className={`${styles.countdown} ${isExpired ? styles.expired : ""}`.trim()}
+    >
       <div>
-        <span className="countdown__label">Submission deadline</span>
+        <span className={styles.label}>Submission deadline</span>
         <strong>{formatDeadline(deadline)}</strong>
         <p>Drafts automatically lock at this time.</p>
       </div>
       <div>
-        <span className="countdown__label">
+        <span className={styles.label}>
           {isExpired ? "Status" : "Time remaining"}
         </span>
-        <strong>{isExpired ? "Submissions closed" : formatTimeRemaining(timeRemaining)}</strong>
+        <strong>
+          {isExpired ? "Submissions closed" : formatTimeRemaining(timeRemaining)}
+        </strong>
       </div>
     </div>
   );
