@@ -9,7 +9,6 @@ type LobbyRow = {
   name: string;
   host_participant_id: string;
   host_user_id: string | null;
-  admin_pin?: string | null;
   year: number | null;
   round_limit: number | null;
   status: Lobby["status"];
@@ -26,7 +25,6 @@ function toLobby(row: LobbyRow): Lobby {
     name: row.name,
     hostParticipantId: row.host_participant_id,
     hostUserId: row.host_user_id ?? undefined,
-    adminPin: row.admin_pin ?? undefined,
     year: row.year ?? 2026,
     roundLimit: row.round_limit ?? 7,
     status: row.status,
@@ -49,7 +47,6 @@ function toLobbyRow(lobby: Lobby): LobbyRow {
     name: lobby.name,
     host_participant_id: lobby.hostParticipantId,
     host_user_id: lobby.hostUserId ?? null,
-    admin_pin: lobby.adminPin ?? null,
     year: lobby.year ?? 2026,
     round_limit: lobby.roundLimit ?? 1,
     status: lobby.status,
@@ -70,10 +67,6 @@ function loadLobbyLocally(lobbyId: string): Lobby | null {
   } catch {
     return null;
   }
-}
-
-export function loadStoredAdminPin(lobbyId: string): string | null {
-  return loadLobbyLocally(lobbyId)?.adminPin ?? null;
 }
 
 function loadLobbyByCodeLocally(code: string): Lobby | null {
@@ -143,33 +136,49 @@ export async function loadLobby(lobbyId: string): Promise<Lobby | null> {
   return data ? toLobby(data as LobbyRow) : null;
 }
 
-export async function loadLobbyByCode(
-  code: string,
-): Promise<Lobby | null> {
-  const normalizedCode = code.trim().toUpperCase();
-
-  if (!supabase) return loadLobbyByCodeLocally(normalizedCode);
+export async function getHostedLobbies(userId: string): Promise<Lobby[]> {
+  if (!supabase) {
+    return getAllLobbiesLocally().filter((lobby) => lobby.hostUserId === userId);
+  }
 
   const { data, error } = await supabase
     .from("lobbies")
     .select(LOBBY_SELECT_COLUMNS)
-    .eq("code", normalizedCode)
-    .maybeSingle();
-
-  if (error) throw error;
-  return data ? toLobby(data as LobbyRow) : null;
-}
-
-export async function getAllLobbies(): Promise<Lobby[]> {
-  if (!supabase) return getAllLobbiesLocally();
-
-  const { data, error } = await supabase
-    .from("lobbies")
-    .select(LOBBY_SELECT_COLUMNS)
+    .eq("host_user_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
   return (data as LobbyRow[]).map(toLobby);
+}
+
+export async function getLobbiesByIds(lobbyIds: string[]): Promise<Lobby[]> {
+  if (lobbyIds.length === 0) return [];
+
+  if (!supabase) {
+    const byId = new Set(lobbyIds);
+    return getAllLobbiesLocally().filter((lobby) => byId.has(lobby.id));
+  }
+
+  const { data, error } = await supabase
+    .rpc("find_lobbies_by_ids", { lobby_ids: lobbyIds });
+
+  if (error) throw error;
+  return (data as LobbyRow[]).map(toLobby);
+}
+
+export async function findLobbyByCode(code: string): Promise<Lobby | null> {
+  const normalizedCode = code.trim().toUpperCase();
+
+  if (!supabase) return loadLobbyByCodeLocally(normalizedCode);
+
+  const { data, error } = await supabase.rpc("find_lobby_by_code", {
+    room_code: normalizedCode,
+  });
+
+  if (error) throw error;
+
+  const result = Array.isArray(data) ? data[0] : data;
+  return result ? toLobby(result as LobbyRow) : null;
 }
 
 export function generateLobbyCode(length = 6) {
@@ -179,47 +188,4 @@ export function generateLobbyCode(length = 6) {
     code += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
   }
   return code;
-}
-
-export function generateAdminPin(length = 6) {
-  let pin = "";
-  for (let i = 0; i < length; i++) {
-    pin += Math.floor(Math.random() * 10).toString();
-  }
-  return pin;
-}
-
-export async function verifyAdminPin(
-  code: string,
-  adminPin: string,
-): Promise<{ lobbyId: string; participantId: string } | null> {
-  const normalizedCode = code.trim().toUpperCase();
-  const normalizedPin = adminPin.trim();
-
-  if (!normalizedCode || !normalizedPin) return null;
-
-  if (!supabase) {
-    const lobby = loadLobbyByCodeLocally(normalizedCode);
-    if (!lobby || lobby.adminPin !== normalizedPin) return null;
-
-    return {
-      lobbyId: lobby.id,
-      participantId: lobby.hostParticipantId,
-    };
-  }
-
-  const { data, error } = await supabase.rpc("rejoin_lobby_as_admin", {
-    room_code: normalizedCode,
-    pin: normalizedPin,
-  });
-
-  if (error) throw error;
-
-  const result = Array.isArray(data) ? data[0] : data;
-  if (!result) return null;
-
-  return {
-    lobbyId: result.lobby_id,
-    participantId: result.participant_id,
-  };
 }

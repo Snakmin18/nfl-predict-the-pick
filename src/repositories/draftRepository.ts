@@ -154,12 +154,15 @@ export async function loadDraft(draftId: string): Promise<MockDraft | null> {
   return data ? toDraft(data as DraftWithPickRows) : null;
 }
 
-export async function getAllDrafts(): Promise<MockDraft[]> {
-  if (!supabase) return getAllDraftsLocally();
+export async function getDraftsByLobby(lobbyId: string): Promise<MockDraft[]> {
+  if (!supabase) {
+    return getAllDraftsLocally().filter((draft) => draft.lobbyId === lobbyId);
+  }
 
   const { data, error } = await supabase
     .from("drafts")
     .select("*, draft_picks(*)")
+    .eq("lobby_id", lobbyId)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -169,12 +172,23 @@ export async function getAllDrafts(): Promise<MockDraft[]> {
 export async function loadOfficialDraft(
   year: number,
 ): Promise<MockDraft | null> {
-  const allDrafts = await getAllDrafts();
+  if (!supabase) {
+    return (
+      getAllDraftsLocally().find(
+        (draft) =>
+          draft.isOfficialResult && draft.year === year && !draft.lobbyId,
+      ) ?? null
+    );
+  }
 
-  return (
-    allDrafts.find(
-      (draft) =>
-        draft.isOfficialResult && draft.year === year && !draft.lobbyId,
-    ) ?? null
-  );
+  const { data, error } = await supabase
+    .from("drafts")
+    .select("*, draft_picks(*)")
+    .eq("year", year)
+    .eq("is_official_result", true)
+    .is("lobby_id", null)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? toDraft(data as DraftWithPickRows) : null;
 }

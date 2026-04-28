@@ -54,13 +54,12 @@ export function isParticipantLobbyDraft(draft: MockDraft | null) {
 export function canEditParticipantDraft({
   currentUserId,
   draft,
-  lobby,
-}: Pick<DraftAccessContext, "currentUserId" | "draft" | "lobby">) {
+}: Pick<DraftAccessContext, "currentUserId" | "draft">) {
   return Boolean(
     draft &&
       isParticipantLobbyDraft(draft) &&
       currentUserId &&
-      (draft.userId === currentUserId || lobby?.hostUserId === currentUserId),
+      draft.userId === currentUserId,
   );
 }
 
@@ -119,7 +118,7 @@ export function getSubmitDraftMessage(
   }
 
   if (!canEditParticipantDraft(context)) {
-    return "This draft can only be edited or submitted by its owner or the room host.";
+    return "This draft can only be edited or submitted by its owner.";
   }
 
   if (context.draft?.submittedAt) {

@@ -1,3 +1,29 @@
+# Predict The Pick
+
+## CFBD Search
+
+Player search now runs through the Supabase Edge Function at
+`supabase/functions/cfbd-player-search` so the CFBD bearer token is not exposed
+to the browser.
+
+Set these Supabase function secrets before deploying the function:
+
+- `CFBD_API_KEY`
+- `CFBD_BASE_URL` (optional, defaults to `https://apinext.collegefootballdata.com`)
+
+Typical flow:
+
+```bash
+supabase secrets set CFBD_API_KEY=your_key
+supabase secrets set CFBD_BASE_URL=https://apinext.collegefootballdata.com
+supabase functions deploy cfbd-player-search
+```
+
+The frontend only needs the normal public values:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
