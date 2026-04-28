@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthPanel from "../components/AuthPanel/AuthPanel";
 import {
-  generateAdminPin,
+  findLobbyByCode,
   generateLobbyCode,
-  getAllLobbies,
-  loadLobbyByCode,
+  getHostedLobbies,
+  getLobbiesByIds,
   saveLobby,
 } from "../utils/lobbyStorage";
 import {
@@ -29,16 +29,21 @@ type MyLobbyEntry = {
 };
 
 async function loadMyLobbyEntries(userId: string): Promise<MyLobbyEntry[]> {
-  const [loadedLobbies, loadedParticipants] = await Promise.all([
-    getAllLobbies(),
+  const [hostedLobbies, loadedParticipants] = await Promise.all([
+    getHostedLobbies(userId),
     getParticipantsByUser(userId),
   ]);
+  const participantLobbyIds = Array.from(
+    new Set(loadedParticipants.map((participant) => participant.lobbyId)),
+  );
+  const participantLobbies = await getLobbiesByIds(participantLobbyIds);
+  const loadedLobbies = [...hostedLobbies, ...participantLobbies];
   const lobbiesById = new Map(loadedLobbies.map((lobby) => [lobby.id, lobby]));
   const entriesByLobbyId = new Map<string, MyLobbyEntry>();
 
   function addEntry(entry: MyLobbyEntry) {
     const existingEntry = entriesByLobbyId.get(entry.lobby.id);
-    if (!existingEntry || entry.role === "admin") {
+    if (!existingEntry || entry.role === "host") {
       entriesByLobbyId.set(entry.lobby.id, entry);
     }
   }
@@ -48,7 +53,7 @@ async function loadMyLobbyEntries(userId: string): Promise<MyLobbyEntry[]> {
       addEntry({
         lobby,
         participantId: lobby.hostParticipantId,
-        role: "admin",
+        role: "host",
       });
     }
   }
@@ -76,7 +81,7 @@ export default function HomePage() {
     "create" | "join"
   >("create");
   const [roomName, setRoomName] = useState("");
-  const [adminName, setAdminName] = useState("");
+  const [hostName, setHostName] = useState("");
   const [roundLimit, setRoundLimit] = useState(1);
   const [joinCode, setJoinCode] = useState("");
   const [playerName, setPlayerName] = useState("");
@@ -104,7 +109,7 @@ export default function HomePage() {
         setAuthUser(loadedUser);
         setProfile(loadedProfile);
         if (loadedProfile?.displayName) {
-          setAdminName((current) => current || loadedProfile.displayName);
+          setHostName((current) => current || loadedProfile.displayName);
           setPlayerName((current) => current || loadedProfile.displayName);
         }
         setMyLobbies(loadedLobbies);
@@ -133,7 +138,7 @@ export default function HomePage() {
     setMyLobbies(nextLobbies);
 
     if (nextProfile?.displayName) {
-      setAdminName((current) => current || nextProfile.displayName);
+      setHostName((current) => current || nextProfile.displayName);
       setPlayerName((current) => current || nextProfile.displayName);
     }
   };
@@ -157,12 +162,11 @@ export default function HomePage() {
     }
 
     const name = roomName.trim() || "My Draft Lobby";
-    const admin = adminName.trim() || profile?.displayName || "Host";
+    const host = hostName.trim() || profile?.displayName || "Host";
 
     const lobbyId = crypto.randomUUID();
     const participantId = crypto.randomUUID();
     const code = generateLobbyCode();
-    const adminPin = generateAdminPin();
     const now = new Date().toISOString();
     const userId = await getCurrentUserId();
 
@@ -172,7 +176,6 @@ export default function HomePage() {
       name,
       hostParticipantId: participantId,
       hostUserId: userId,
-      adminPin,
       year: 2026,
       roundLimit,
       status: "waiting",
@@ -186,14 +189,12 @@ export default function HomePage() {
         id: participantId,
         lobbyId,
         userId,
-        name: admin,
-        role: "admin",
+        name: host,
+        role: "host",
         joinedAt: now,
       });
 
-      navigate(`/lobby/${lobbyId}/${participantId}`, {
-        state: { adminPin },
-      });
+      navigate(`/lobby/${lobbyId}/${participantId}`);
     } catch {
       setCreateError("Unable to create room. Please try again.");
     }
@@ -209,7 +210,7 @@ export default function HomePage() {
     const name = playerName.trim() || profile?.displayName || "Guest";
 
     try {
-      const lobby = await loadLobbyByCode(code);
+      const lobby = await findLobbyByCode(code);
       if (!lobby) {
         setJoinError("Room code not found.");
         return;
@@ -241,7 +242,7 @@ export default function HomePage() {
           NFL Predict The Pick
         </Link>
 
-        <nav className="site-header__nav" aria-label="Admin navigation">
+        <nav className="site-header__nav" aria-label="App admin navigation">
           {profile?.isAppAdmin && (
             <Link to="/admin/official-draft">App Admin: Official Draft</Link>
           )}
@@ -284,11 +285,11 @@ export default function HomePage() {
                 onChange={(e) => setRoomName(e.target.value)}
                 placeholder="2026 Draft Party"
               />
-              <label htmlFor="admin-name">Your name</label>
+              <label htmlFor="host-name">Your name</label>
               <input
-                id="admin-name"
-                value={adminName}
-                onChange={(e) => setAdminName(e.target.value)}
+                id="host-name"
+                value={hostName}
+                onChange={(e) => setHostName(e.target.value)}
                 placeholder="Host"
               />
               <label htmlFor="round-limit">Prediction rounds</label>
@@ -361,7 +362,7 @@ export default function HomePage() {
                       <span className="my-lobbies__code">{lobby.code}</span>
                     </span>
                     <span className="my-lobbies__role">
-                      {role === "admin" ? "Host" : "Player"}
+                      {role === "host" ? "Host" : "Player"}
                     </span>
                   </Link>
                 ))}

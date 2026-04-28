@@ -6,14 +6,13 @@ export type Lobby = {
   name: string;
   hostParticipantId: string;
   hostUserId?: string;
-  adminPin?: string;
   year: number;
   roundLimit: number;
   createdAt: string;
   status: LobbyStatus;
 };
 
-export type ParticipantRole = "admin" | "player";
+export type ParticipantRole = "host" | "player";
 
 export type Participant = {
   id: string;

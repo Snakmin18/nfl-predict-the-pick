@@ -8,7 +8,7 @@ import {
 } from "../utils/participantStorage";
 import { scoreLobbyDrafts } from "../utils/scoring";
 import {
-  getAllDrafts,
+  getDraftsByLobby,
   loadOfficialDraft,
   saveDraft,
 } from "../repositories/draftRepository";
@@ -27,10 +27,10 @@ export async function loadLobbyPageData(
   lobbyId: string,
   participantId: string,
 ): Promise<LobbyPageData> {
-  const [lobby, participant, allDrafts] = await Promise.all([
+  const [lobby, participant, drafts] = await Promise.all([
     loadLobby(lobbyId),
     participantId ? loadParticipant(participantId) : Promise.resolve(null),
-    getAllDrafts(),
+    getDraftsByLobby(lobbyId),
   ]);
 
   const [participants, officialDraft] = await Promise.all([
@@ -42,9 +42,7 @@ export async function loadLobbyPageData(
     lobby,
     participant,
     participants,
-    drafts: allDrafts.filter(
-      (draft) => draft.lobbyId === lobbyId && !draft.isOfficialResult,
-    ),
+    drafts: drafts.filter((draft) => !draft.isOfficialResult),
     officialDraft,
   };
 }

@@ -23,9 +23,9 @@ export default function LobbyWelcomeCard({
       <h2>Welcome, {participant.name}</h2>
       <p>
         You are logged in as{" "}
-        <strong>{participant.role === "admin" ? "host" : "player"}</strong>.
+        <strong>{participant.role === "host" ? "host" : "player"}</strong>.
       </p>
-      {participant.role === "admin" && (
+      {participant.role === "host" && (
         <>
           <p>
             As host, you can review room drafts and keep track of who has

@@ -1,7 +1,5 @@
 import type { Player } from "../types/player";
-
-const BASE_URL = import.meta.env.VITE_CFBD_BASE_URL;
-const API_KEY = import.meta.env.VITE_CFBD_API_KEY;
+import { supabase } from "../lib/supabase/client";
 
 type CfbdPlayerResponse = {
   id?: string | number;
@@ -14,26 +12,12 @@ type CfbdPlayerResponse = {
   year?: number;
 };
 
-export async function searchPlayers(searchTerm: string): Promise<Player[]> {
-  if (!searchTerm.trim()) return [];
-  if (!BASE_URL || !API_KEY) return [];
+type CfbdPlayerSearchResponse = {
+  players: CfbdPlayerResponse[];
+};
 
-  const url = new URL("/player/search", BASE_URL);
-  url.searchParams.set("searchTerm", searchTerm);
-
-  const response = await fetch(url.toString(), {
-    headers: {
-      Authorization: `Bearer ${API_KEY}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`CFBD request failed: ${response.status}`);
-  }
-
-  const data = (await response.json()) as CfbdPlayerResponse[];
-
-  return data.map((player, index) => ({
+function toPlayer(player: CfbdPlayerResponse, index: number): Player {
+  return {
     id: String(player.id ?? `${player.name ?? "player"}-${index}`),
     name:
       player.name?.trim() ||
@@ -42,5 +26,24 @@ export async function searchPlayers(searchTerm: string): Promise<Player[]> {
     position: player.position,
     school: player.school ?? player.team,
     year: player.year,
-  }));
+  };
+}
+
+export async function searchPlayers(searchTerm: string): Promise<Player[]> {
+  if (!searchTerm.trim()) return [];
+  if (!supabase) return [];
+
+  const { data, error } = await supabase.functions.invoke<CfbdPlayerSearchResponse>(
+    "cfbd-player-search",
+    {
+      body: { searchTerm },
+    },
+  );
+
+  if (error) {
+    throw new Error(error.message || "CFBD request failed.");
+  }
+
+  const players = data?.players ?? [];
+  return players.map(toPlayer);
 }

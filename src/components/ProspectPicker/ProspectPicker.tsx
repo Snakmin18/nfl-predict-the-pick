@@ -46,25 +46,22 @@ export default function ProspectPicker({
     ).sort((a, b) => a.localeCompare(b));
   }, [prospects]);
 
-  useEffect(() => {
-    if (
-      normalizedSelectedPosition &&
-      !positionOptions.includes(normalizedSelectedPosition)
-    ) {
-      setSelectedPosition("");
-    }
-  }, [normalizedSelectedPosition, positionOptions]);
+  const effectiveSelectedPosition =
+    normalizedSelectedPosition &&
+    positionOptions.includes(normalizedSelectedPosition)
+      ? normalizedSelectedPosition
+      : "";
 
   const filteredProspects = useMemo(() => {
-    if (!normalizedSelectedPosition) {
+    if (!effectiveSelectedPosition) {
       return prospects;
     }
 
     return prospects.filter(
       (prospect) =>
-        normalizePosition(prospect.position) === normalizedSelectedPosition,
+        normalizePosition(prospect.position) === effectiveSelectedPosition,
     );
-  }, [normalizedSelectedPosition, prospects]);
+  }, [effectiveSelectedPosition, prospects]);
 
   const localSearchProspects = useMemo(() => {
     if (!normalizedSearchTerm) {
@@ -161,7 +158,7 @@ export default function ProspectPicker({
           <span>Position</span>
           <select
             id={`${inputId}-position`}
-            value={selectedPosition}
+            value={effectiveSelectedPosition}
             onChange={(event) => setSelectedPosition(event.target.value)}
           >
             <option value="">All positions</option>

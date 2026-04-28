@@ -107,9 +107,7 @@ export async function saveParticipant(participant: Participant) {
 
   if (!supabase) return;
 
-  const { error } = await supabase
-    .from("participants")
-    .upsert(toParticipantRow(participant));
+  const { error } = await supabase.from("participants").insert(toParticipantRow(participant));
 
   if (error) throw error;
 }
