@@ -145,8 +145,8 @@ export function getOfficialDraftMessage(
   }
 
   return isCurrentUserAppAdmin
-    ? "Save after entering official picks to update scoring."
-    : "Only app admins can edit the official draft.";
+    ? "Save after entering actual picks to update scoring."
+    : "Only app admins can edit the results board.";
 }
 
 export async function submitParticipantDraft(draft: MockDraft) {

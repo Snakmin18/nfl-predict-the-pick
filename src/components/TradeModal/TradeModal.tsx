@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { nflTeams as teams } from "../../data/nflTeams";
+import { proTeams as teams } from "../../data/proTeams";
 import type { MockDraft } from "../../types/draft";
 import { formatTeamLabel } from "../../utils/teams";
 import type { PendingTrade } from "../../utils/trades";
@@ -183,7 +183,7 @@ export default function TradeModal({
             >
               {teams.map((team) => (
                 <option key={team.id} value={team.id}>
-                  {team.city} {team.name}
+                  {team.label}
                 </option>
               ))}
             </select>
@@ -202,7 +202,7 @@ export default function TradeModal({
                 .filter((team) => team.id !== teamAId)
                 .map((team) => (
                   <option key={team.id} value={team.id}>
-                    {team.city} {team.name}
+                    {team.label}
                   </option>
                 ))}
             </select>

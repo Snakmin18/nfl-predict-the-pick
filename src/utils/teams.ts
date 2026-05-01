@@ -1,7 +1,7 @@
-import { nflTeams } from "../data/nflTeams";
+import { proTeams } from "../data/proTeams";
 
 export function getTeamById(teamId: string) {
-  return nflTeams.find((team) => team.id === teamId) ?? null;
+  return proTeams.find((team) => team.id === teamId) ?? null;
 }
 
 export function formatTeamLabel(teamId: string, originalOwnerTeamId?: string) {
@@ -15,9 +15,9 @@ export function formatTeamLabel(teamId: string, originalOwnerTeamId?: string) {
     const originalOwner = getTeamById(originalOwnerTeamId);
 
     if (originalOwner) {
-      return `${team.city} ${team.name} (via ${originalOwner.abbreviation})`;
+      return `${team.label} (via ${originalOwner.shortLabel})`;
     }
   }
 
-  return `${team.city} ${team.name}`;
+  return team.label;
 }

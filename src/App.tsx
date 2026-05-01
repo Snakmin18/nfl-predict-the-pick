@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import NewDraftPage from "./pages/NewDraftPage";
 import DraftPage from "./pages/DraftPage";
@@ -11,6 +11,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/play" element={<Navigate to="/" replace />} />
         <Route path="/lobby/:lobbyId/:participantId" element={<LobbyPage />} />
         <Route path="/draft/:draftId" element={<DraftPage />} />
         <Route path="/new" element={<NewDraftPage />} />

@@ -68,7 +68,7 @@ describe("draftService permissions", () => {
     ).toBe(false);
   });
 
-  it("allows only app admins to edit the official draft", () => {
+  it("allows only app admins to edit the results board", () => {
     const officialDraft = createDraft({
       id: "official-1",
       lobbyId: undefined,
@@ -91,7 +91,7 @@ describe("draftService permissions", () => {
       }),
     ).toBe(false);
     expect(getOfficialDraftMessage(officialDraft, false)).toBe(
-      "Only app admins can edit the official draft.",
+      "Only app admins can edit the results board.",
     );
   });
 

@@ -1,7 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import CountdownTimer from "../components/CountdownTimer/CountdownTimer";
 import LobbyDraftListCard from "../components/LobbyPage/LobbyDraftListCard/LobbyDraftListCard";
-import LobbyParticipantsCard from "../components/LobbyPage/LobbyParticipantsCard/LobbyParticipantsCard";
 import LobbyScoreboardCard from "../components/LobbyPage/LobbyScoreboardCard/LobbyScoreboardCard";
 import LobbyWelcomeCard from "../components/LobbyPage/LobbyWelcomeCard/LobbyWelcomeCard";
 import { DRAFT_SUBMISSION_DEADLINE } from "../utils/deadlines";
@@ -19,10 +18,7 @@ export default function LobbyPage() {
     officialDraft,
     participant,
     participantDraft,
-    participantDraftCount,
-    participants,
     scores,
-    submittedDraftCount,
   } = useLobbyPage({
     lobbyId,
     participantId,
@@ -84,21 +80,19 @@ export default function LobbyPage() {
         viewerParticipantId={participant.id}
       />
 
-      <LobbyParticipantsCard lobby={lobby} participants={participants} />
-
       <LobbyScoreboardCard
         lobby={lobby}
         officialDraftExists={Boolean(officialDraft)}
-        participantDraftCount={participantDraftCount}
         scores={scores}
-        submittedDraftCount={submittedDraftCount}
         viewerParticipantId={participant.id}
       />
 
-      <LobbyDraftListCard
-        drafts={drafts}
-        viewerParticipantId={participant.id}
-      />
+      {participant.role === "host" && (
+        <LobbyDraftListCard
+          drafts={drafts}
+          viewerParticipantId={participant.id}
+        />
+      )}
     </div>
   );
 }

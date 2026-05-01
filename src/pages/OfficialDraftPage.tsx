@@ -13,7 +13,7 @@ const OFFICIAL_DRAFT_YEAR = 2026;
 
 export default function OfficialDraftPage() {
   const navigate = useNavigate();
-  const [status, setStatus] = useState("Loading official draft...");
+  const [status, setStatus] = useState("Loading results board...");
 
   useEffect(() => {
     let isMounted = true;
@@ -23,7 +23,7 @@ export default function OfficialDraftPage() {
       const profile = user ? await loadProfile(user.id) : null;
 
       if (!user || !profile?.isAppAdmin) {
-        if (isMounted) setStatus("Only app admins can edit the official draft.");
+        if (isMounted) setStatus("Only app admins can edit the results board.");
         return;
       }
 
@@ -33,19 +33,23 @@ export default function OfficialDraftPage() {
         return;
       }
 
-      const draft = buildDraft(`${OFFICIAL_DRAFT_YEAR} Official Draft`, loadDraftOrder(), {
-        userId: user.id,
-        year: OFFICIAL_DRAFT_YEAR,
-        isOfficialResult: true,
-        roundLimit: 7,
-      });
+      const draft = buildDraft(
+        `${OFFICIAL_DRAFT_YEAR} Draft Results`,
+        loadDraftOrder(),
+        {
+          userId: user.id,
+          year: OFFICIAL_DRAFT_YEAR,
+          isOfficialResult: true,
+          roundLimit: 7,
+        },
+      );
 
       await saveDraft(draft);
       navigate(`/draft/${draft.id}`, { replace: true });
     }
 
     openOfficialDraft().catch(() => {
-      if (isMounted) setStatus("Unable to open official draft.");
+      if (isMounted) setStatus("Unable to open the results board.");
     });
 
     return () => {
@@ -55,7 +59,7 @@ export default function OfficialDraftPage() {
 
   return (
     <div className="page">
-      <h1>Official Draft</h1>
+      <h1>Draft Results</h1>
       <p>{status}</p>
       <Link to="/">Back to home</Link>
     </div>
