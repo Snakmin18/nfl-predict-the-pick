@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { nflTeams } from "../data/nflTeams";
+import { proTeams } from "../data/proTeams";
 import type { DraftOrderItem } from "../types/draft";
 import {
   loadDraftOrder,
@@ -60,24 +60,24 @@ export default function AdminDraftOrderPage() {
 
   const handleSave = () => {
     saveDraftOrder(order);
-    setSavedMessage("Draft order saved.");
+    setSavedMessage("Pick order saved.");
   };
 
   const handleReset = () => {
     resetDraftOrder();
     setOrder(loadDraftOrder());
-    setSavedMessage("Draft order reset to file default.");
+    setSavedMessage("Pick order reset to file default.");
   };
 
   return (
     <div className="page">
-      <Link to="/">← Back</Link>
-      <h1>Admin Draft Order</h1>
-      <p>Edit the live draft order used for new mock drafts.</p>
+      <Link to="/">Back</Link>
+      <h1>Draft Order Controls</h1>
+      <p>Edit the live pick order used for new prediction boards.</p>
 
       <div className="card">
         <div className="admin-actions">
-          <button onClick={handleSave}>Save Draft Order</button>
+          <button onClick={handleSave}>Save Pick Order</button>
           <button type="button" onClick={handleReset}>
             Reset to Default
           </button>
@@ -100,9 +100,9 @@ export default function AdminDraftOrderPage() {
                 value={item.teamId}
                 onChange={(e) => updateItem(index, "teamId", e.target.value)}
               >
-                {nflTeams.map((team) => (
+                {proTeams.map((team) => (
                   <option key={team.id} value={team.id}>
-                    {team.city} {team.name}
+                    {team.label}
                   </option>
                 ))}
               </select>
@@ -120,9 +120,9 @@ export default function AdminDraftOrderPage() {
                 }
               >
                 <option value="">Same as current owner</option>
-                {nflTeams.map((team) => (
+                {proTeams.map((team) => (
                   <option key={team.id} value={team.id}>
-                    {team.city} {team.name}
+                    {team.label}
                   </option>
                 ))}
               </select>

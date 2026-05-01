@@ -1,5 +1,8 @@
 # Predict The Pick
 
+Independent football draft prediction app. It is not affiliated with the NFL
+or any professional team.
+
 ## CFBD Search
 
 Player search now runs through the Supabase Edge Function at

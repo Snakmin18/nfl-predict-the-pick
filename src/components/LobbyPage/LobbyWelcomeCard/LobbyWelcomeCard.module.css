@@ -1,14 +1,46 @@
+.scoringSection {
+  margin: 14px 0;
+}
+
+.scoringSummary {
+  color: #d1d5db;
+  margin: 0 0 10px;
+}
+
 .scoringGuide {
   background: #111827;
   border: 1px solid #374151;
-  border-radius: 8px;
-  margin: 14px 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.scoringToggle {
+  color: #f8fafc;
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
   padding: 12px;
 }
 
-.scoringGuide h3 {
-  font-size: 16px;
-  margin: 0 0 10px;
+.scoringToggle::-webkit-details-marker {
+  display: none;
+}
+
+.scoringToggle::after {
+  color: #7dd3fc;
+  content: "+";
+  float: right;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.scoringGuide[open] .scoringToggle::after {
+  content: "-";
+}
+
+.scoringContent {
+  border-top: 1px solid #374151;
+  padding: 12px;
 }
 
 .scoringGrid {

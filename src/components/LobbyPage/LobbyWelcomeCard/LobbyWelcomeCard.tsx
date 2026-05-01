@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import type { Lobby, Participant } from "../../../types/lobby";
 import type { MockDraft } from "../../../types/draft";
-import styles from "./LobbyWelcomeCard.module.css";
 
 type Props = {
   lobby: Lobby;
@@ -41,22 +40,6 @@ export default function LobbyWelcomeCard({
         Submit your predictions and compare against the official results after
         each round.
       </p>
-
-      <div className={styles.scoringGuide}>
-        <h3>Scoring</h3>
-        <div className={styles.scoringGrid}>
-          <span>Exact pick</span>
-          <strong>100 pts</strong>
-          <span>1 pick off</span>
-          <strong>75 pts</strong>
-          <span>2 picks off</span>
-          <strong>50 pts</strong>
-          <span>3 picks off</span>
-          <strong>25 pts</strong>
-          <span>Correct trade</span>
-          <strong>+50 pts</strong>
-        </div>
-      </div>
 
       {participantDraft ? (
         <Link

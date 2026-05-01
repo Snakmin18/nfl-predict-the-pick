@@ -1,6 +1,5 @@
 export type Team = {
   id: string;
-  name: string;
-  city: string;
-  abbreviation: string;
+  label: string;
+  shortLabel: string;
 };
